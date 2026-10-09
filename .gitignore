@@ -7,3 +7,6 @@ next-env.d.ts
 *.tsbuildinfo
 .DS_Store
 .next-*
+
+# Full-size original photo (5 MB, may carry GPS metadata); the site uses the cropped public/me.jpg
+public/photo.JPG

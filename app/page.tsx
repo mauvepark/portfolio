@@ -1,5 +1,5 @@
+import Image from 'next/image';
 import { SiteHeader } from '@/components/SiteHeader';
-import { Hatch } from '@/components/sketch/PencilFilters';
 import { getNotes, getProjectSummaries } from '@/lib/content';
 import { ProjectsSection } from '@/components/projects/ProjectsSection';
 import { site } from '@/lib/site';
@@ -63,7 +63,15 @@ export default async function Home() {
         <div className={styles.photoCol}>
           <figure className={`sketch ${styles.photo}`}>
             <div className="tape" aria-hidden="true" />
-            <Hatch label="your photo" className={styles.photoImg} />
+            <Image
+              src="/me.jpg"
+              alt="Noor smiling on a rocky hiking trail"
+              width={720}
+              height={780}
+              sizes="240px"
+              priority
+              className={styles.photoImg}
+            />
             <figcaption className={`aside ${styles.caption}`}>probably sketching something</figcaption>
           </figure>
         </div>
