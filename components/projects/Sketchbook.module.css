@@ -78,12 +78,43 @@
   .blurb { font-size: 18px; }
 }
 
+/* ---------- narrow screens: single-page sketch pad ---------- */
+.pad { display: none; }
+.singlePage {
+  border-radius: 3px 3px 10px 12px; gap: 12px; padding: 26px 22px 48px;
+  background-image: repeating-linear-gradient(transparent 0 33px, rgba(46, 46, 43, .07) 33px 34px);
+}
+.singlePage .folio { right: 22px; }
+
+/* Page and leaf share one grid cell, so the pad grows to whichever page is taller. */
+.pad { grid-template-areas: 'page'; perspective: 1800px; filter: none; }
+.pad > * { grid-area: page; }
+.leafPad { position: relative; inset: auto; width: auto; transform-origin: top center; }
+.leafPad .face:first-child { position: relative; }
+.padBack {
+  transform: rotateX(180deg); background: var(--card); border: 1.6px solid var(--graphite);
+  border-radius: 3px 3px 10px 12px;
+}
+/* Shading runs top-to-bottom for a vertical flip. */
+.leafPad .face::after { background: linear-gradient(to bottom, rgba(38, 38, 36, .18), transparent 60%); }
+.flipUp { animation-name: flipUp; }
+.flipDown { animation-name: flipDown; }
+@keyframes flipUp {
+  from { transform: rotateX(0); opacity: 1; }
+  70% { opacity: 1; }
+  to { transform: rotateX(180deg); opacity: 0; }
+}
+@keyframes flipDown {
+  from { transform: rotateX(180deg); opacity: 0; }
+  30% { opacity: 1; }
+  to { transform: rotateX(0); opacity: 1; }
+}
+
+@media (max-width: 767px) {
+  .spread { display: none; }
+  .pad { display: grid; }
+  .book { padding-top: 40px; }
+}
+
 /* ---------- book vs grid ---------- */
 .hidden { display: none; }
-.gridFallback { display: none; }
-/* Phones and narrow tablets: the spread is too cramped, so always show the card grid. */
-@media (max-width: 767px) {
-  .bookOnly { display: none; }
-  .gridFallback { display: block; }
-  .viewToggle { display: none !important; }
-}

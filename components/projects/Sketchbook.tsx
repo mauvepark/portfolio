@@ -46,6 +46,26 @@ function RightPage({ p, i, live }: { p: ProjectSummary; i: number; live?: boolea
   );
 }
 
+/** Narrow screens: one page per project, everything on it. */
+function SinglePage({ p, i, live }: { p: ProjectSummary; i: number; live?: boolean }) {
+  return (
+    <div className={`${styles.page} ${styles.singlePage}`}>
+      <Hatch label={p.cover} height={160} />
+      <p className="label label-sm">{p.kind}</p>
+      <h3 className={styles.title}>{p.title}</h3>
+      {live && <DrawnUnderline key={p.slug} width="min(220px, 70%)" delay={TURN_MS * 0.4} />}
+      <p className={styles.blurb}>{p.blurb}</p>
+      <p className={styles.stack}>{p.stack}</p>
+      {live ? (
+        <Link className="btn sketch" href={p.link} style={{ alignSelf: 'flex-start' }}>[{p.cta} →]</Link>
+      ) : (
+        <span className={`btn ${styles.ghostBtn}`} style={{ alignSelf: 'flex-start' }}>[{p.cta} →]</span>
+      )}
+      <span className={styles.folio}>p. {pad(i + 1)}</span>
+    </div>
+  );
+}
+
 export function Sketchbook({ projects }: { projects: ProjectSummary[] }) {
   const [index, setIndex] = useState(0);
   const [turn, setTurn] = useState<Turn | null>(null);
@@ -70,6 +90,17 @@ export function Sketchbook({ projects }: { projects: ProjectSummary[] }) {
     },
     [turn, index, n],
   );
+
+  // Backstop: if animationend never arrives (resized across the breakpoint mid-turn, so the
+  // animating leaf was hidden), still land on the target page shortly after the turn should end.
+  useEffect(() => {
+    if (!turn) return;
+    const t = setTimeout(() => {
+      setIndex(turn.to);
+      setTurn(null);
+    }, TURN_MS + 200);
+    return () => clearTimeout(t);
+  }, [turn]);
 
   function finishTurn(e: React.AnimationEvent) {
     // Ignore the shading animation on the faces bubbling up; only the leaf's own turn counts.
@@ -150,6 +181,26 @@ export function Sketchbook({ projects }: { projects: ProjectSummary[] }) {
             <div className={`${styles.face} ${styles.back}`}>
               {turn.dir === 'next' ? <LeftPage p={projects[turn.to]} i={turn.to} /> : <RightPage p={projects[turn.to]} i={turn.to} />}
             </div>
+          </div>
+        )}
+      </div>
+
+      {/* Narrow screens: a top-bound sketch pad. "Next" flips the current page up and over the top;
+          "Prev" brings the earlier page back down. Hidden leaves never animate, so only the
+          visible layout's animationend finishes the turn. */}
+      <div className={styles.pad}>
+        <SinglePage p={projects[turn ? (turn.dir === 'next' ? turn.to : turn.from) : index]} i={turn ? (turn.dir === 'next' ? turn.to : turn.from) : index} live={!turn} />
+        {turn && (
+          <div
+            className={`${styles.leaf} ${styles.leafPad} ${turn.dir === 'next' ? styles.flipUp : styles.flipDown}`}
+            style={{ animationDuration: `${TURN_MS}ms`, '--turn-ms': `${TURN_MS}ms` } as React.CSSProperties}
+            onAnimationEnd={finishTurn}
+            aria-hidden="true"
+          >
+            <div className={styles.face}>
+              <SinglePage p={projects[turn.dir === 'next' ? turn.from : turn.to]} i={turn.dir === 'next' ? turn.from : turn.to} />
+            </div>
+            <div className={`${styles.face} ${styles.padBack}`} />
           </div>
         )}
       </div>

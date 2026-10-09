@@ -1,4 +1,3 @@
-import Link from 'next/link';
 import { SiteHeader } from '@/components/SiteHeader';
 import { Hatch } from '@/components/sketch/PencilFilters';
 import { getNotes, getProjectSummaries } from '@/lib/content';
@@ -6,8 +5,11 @@ import { ProjectsSection } from '@/components/projects/ProjectsSection';
 import { site } from '@/lib/site';
 import { Guestbook } from '@/components/guestbook/Guestbook';
 import { Workbench } from '@/components/workbench/Workbench';
+import { NotesSection } from '@/components/notes/NotesSection';
+import { Prose } from '@/components/Prose';
 import { PAGE_SIZE, PUBLIC_COLUMNS, type Entry } from '@/lib/guestbook';
 import { supabasePublic } from '@/lib/supabase';
+import styles from './page.module.css';
 
 // Re-render at most once a minute; new doodles arrive in between via realtime.
 export const revalidate = 60;
@@ -46,26 +48,28 @@ export default async function Home() {
     <div className="wrap">
       <SiteHeader />
 
-      {/* ABOUT */}
-      <section id="about" style={{ display: 'flex', flexWrap: 'wrap', alignItems: 'center', gap: 56, padding: '88px 0 96px' }}>
-        <div style={{ flex: '0 1 300px', display: 'flex', justifyContent: 'center' }}>
-          <figure className="sketch" style={{ margin: 0, transform: 'rotate(-3deg)', background: 'var(--card)', padding: '16px 16px 20px', boxShadow: '0 2px 0 rgba(0,0,0,.04)' }}>
+      {/* ABOUT — sized to the window's height so the whole intro is visible on load */}
+      <section id="about" className={styles.intro}>
+        <div className={styles.photoCol}>
+          <figure className={`sketch ${styles.photo}`}>
             <div className="tape" aria-hidden="true" />
-            <Hatch label="your photo" width={240} height={260} />
-            <figcaption className="aside" style={{ textAlign: 'center', marginTop: 12 }}>probably sketching something</figcaption>
+            <Hatch label="your photo" className={styles.photoImg} />
+            <figcaption className={`aside ${styles.caption}`}>probably sketching something</figcaption>
           </figure>
         </div>
-        <div style={{ flex: '999 1 460px', minWidth: 0, display: 'flex', flexDirection: 'column', gap: 22 }}>
+        <div className={styles.text}>
           <p className="label">Software engineering · Product · Design</p>
-          <h1 className="hand" style={{ margin: 0, fontWeight: 700, fontSize: 'clamp(56px, 9vw, 84px)', lineHeight: 0.95 }}>
-            hi, I&apos;m Noor.<br /><span style={{ color: 'var(--accent)' }}>I build things</span> and sketch the why.
+          <h1 className={`hand ${styles.headline}`}>
+            <span className={styles.line}>hi, I&apos;m Noor.</span>
+            <span className={styles.line} style={{ color: 'var(--accent)' }}>I build things</span>
+            <span className={styles.line}>and sketch the why.</span>
           </h1>
-          <p className="lede">I&apos;m a third-year software engineering student at the University of Calgary (Schulich), with a previous degree in biological sciences. I like the space where design, engineering and people meet, which is why I&apos;m heading toward product management while still building as an engineer.</p>
-          <p className="lede">Right now I&apos;m Co-VP Internal at ZOO, our software &amp; electrical engineering society, leading a team of four on marketing and operations for 1,300+ members.</p>
-          <div className="btn-row" style={{ marginTop: 6 }}>
+          <p className={`lede ${styles.lede}`}>I&apos;m a third-year software engineering student at the University of Calgary (Schulich), with a previous degree in biological sciences. I like the space where design, engineering and people meet, which is why I&apos;m heading toward product management while still building as an engineer.</p>
+          <p className={`lede ${styles.lede}`}>Right now I&apos;m Co-VP Internal at ZOO, our software &amp; electrical engineering society, leading a team of four on marketing and operations for 1,300+ members.</p>
+          <div className="btn-row">
             <SocialButtons order={['resume', 'linkedin', 'github']} />
           </div>
-          <p className="aside" style={{ marginTop: 4 }}>→ open to PM &amp; SWE internships, 2027</p>
+          <p className={`aside ${styles.open}`}>→ open to PM &amp; SWE internships, 2027</p>
         </div>
       </section>
 
@@ -90,22 +94,10 @@ export default async function Home() {
         </div>
       </section>
 
-      {/* NOTES */}
-      <section id="notes" className="section">
-        <div className="section-head" style={{ marginBottom: 28 }}>
-          <h2 className="section-title">notes</h2>
-          <Link className="navlink" href="/notes">[View all]</Link>
-        </div>
-        <div style={{ display: 'flex', flexDirection: 'column' }}>
-          {notes.slice(0, 3).map((n) => (
-            <Link key={n.slug} className="row" href={`/notes/${n.slug}`}>
-              <span className="row-date">{n.date}</span>
-              <span className="row-title">{n.title}</span>
-              <span className="navlink" style={{ minHeight: 0 }}>[Read]</span>
-            </Link>
-          ))}
-        </div>
-      </section>
+      <NotesSection
+        notes={notes.map(({ slug, title, date }) => ({ slug, title, date }))}
+        bodies={Object.fromEntries(notes.map((n) => [n.slug, <Prose key={n.slug} source={n.body} />]))}
+      />
 
       <Guestbook initial={wall} />
 

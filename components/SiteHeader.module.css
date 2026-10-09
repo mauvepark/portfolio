@@ -1,0 +1,29 @@
+/* Sticky bar: paper-coloured so content scrolls underneath it cleanly. */
+.bar {
+  position: sticky; top: 0; z-index: 50;
+  /* Bleed the paper background to the viewport edges without changing layout. */
+  margin: 0 -100vmax; padding: 0 100vmax;
+  background: color-mix(in srgb, var(--paper) 94%, transparent);
+  backdrop-filter: blur(4px);
+  transition: box-shadow .2s ease;
+}
+.bar[data-scrolled='true'] { box-shadow: 0 6px 14px -12px rgba(38, 38, 36, .35); }
+
+.header {
+  display: flex; flex-wrap: wrap; justify-content: space-between; align-items: center;
+  gap: 4px 12px; padding: 18px 0 8px;
+}
+.name { font-size: 40px; font-weight: 700; line-height: 1; }
+.nav { display: flex; flex-wrap: wrap; gap: 0 22px; }
+
+/* Phones: one row of links that scrolls sideways instead of wrapping into a tall bar. */
+@media (max-width: 760px) {
+  .header { padding: 12px 0 2px; }
+  .name { font-size: 34px; }
+  .nav {
+    flex-wrap: nowrap; gap: 0 16px; width: 100%;
+    overflow-x: auto; scrollbar-width: none; overflow-y: hidden;
+  }
+  .nav::-webkit-scrollbar { display: none; }
+  .nav :global(.navlink) { flex: none; font-size: 13px; }
+}
