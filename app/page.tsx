@@ -3,6 +3,21 @@ import { SiteHeader } from '@/components/SiteHeader';
 import { Hatch } from '@/components/sketch/PencilFilters';
 import { getNotes, getProjects, projectHref } from '@/lib/content';
 import { site } from '@/lib/site';
+import { Guestbook } from '@/components/guestbook/Guestbook';
+import { PAGE_SIZE, PUBLIC_COLUMNS, type Entry } from '@/lib/guestbook';
+import { supabasePublic } from '@/lib/supabase';
+
+// Re-render at most once a minute; new doodles arrive in between via realtime.
+export const revalidate = 60;
+
+async function getWall(): Promise<Entry[]> {
+  const { data } = await supabasePublic()
+    .from('guestbook')
+    .select(PUBLIC_COLUMNS)
+    .order('created_at', { ascending: false })
+    .limit(PAGE_SIZE);
+  return (data as Entry[] | null) ?? [];
+}
 
 const skills = [
   { title: 'Product', items: ['PRDs & product teardowns', 'RICE & MoSCoW prioritization', 'User & competitor research', 'Agile: sprint planning, backlogs', 'Translating between design, eng & stakeholders'] },
@@ -21,9 +36,10 @@ function SocialButtons({ order }: { order: ('resume' | 'linkedin' | 'github')[] 
   );
 }
 
-export default function Home() {
+export default async function Home() {
   const projects = getProjects();
   const notes = getNotes();
+  const wall = await getWall();
 
   return (
     <div className="wrap">
@@ -105,6 +121,8 @@ export default function Home() {
           ))}
         </div>
       </section>
+
+      <Guestbook initial={wall} />
 
       {/* CONTACT */}
       <section id="contact" style={{ padding: '24px 0 64px' }}>

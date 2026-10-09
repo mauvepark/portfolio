@@ -10,6 +10,7 @@ export function SiteHeader() {
           <Link className="navlink" href="/#projects">[Projects]</Link>
           <Link className="navlink" href="/#skills">[Skills]</Link>
           <Link className="navlink" href="/#notes">[Notes]</Link>
+          <Link className="navlink" href="/#guestbook">[Guestbook]</Link>
           <Link className="navlink" href="/#contact">[Contact]</Link>
         </nav>
       </header>
