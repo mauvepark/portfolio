@@ -1,0 +1,168 @@
+'use client';
+
+import Link from 'next/link';
+import { useCallback, useEffect, useRef, useState } from 'react';
+import { Hatch } from '@/components/sketch/PencilFilters';
+import { DrawnUnderline } from '@/components/sketch/DrawnUnderline';
+import type { ProjectSummary } from '@/lib/content';
+import styles from './Sketchbook.module.css';
+
+type Turn = { from: number; to: number; dir: 'next' | 'prev' };
+
+const TURN_MS = 750;
+const pad = (n: number) => String(n).padStart(2, '0');
+
+function LeftPage({ p, i, live }: { p: ProjectSummary; i: number; live?: boolean }) {
+  return (
+    <div className={`${styles.page} ${styles.left}`}>
+      <div className={styles.cover}>
+        <Hatch label={p.cover} height={220} />
+      </div>
+      <p className="label label-sm">{p.kind}</p>
+      <h3 className={styles.title}>{p.title}</h3>
+      {/* Keyed by page so the stroke replays on every turn. */}
+      {live && <DrawnUnderline key={p.slug} width="min(260px, 80%)" delay={TURN_MS * 0.4} />}
+      <span className={styles.folio}>p. {pad(i * 2 + 1)}</span>
+    </div>
+  );
+}
+
+function RightPage({ p, i, live }: { p: ProjectSummary; i: number; live?: boolean }) {
+  return (
+    <div className={`${styles.page} ${styles.right}`}>
+      <p className={styles.blurb}>{p.blurb}</p>
+      <div>
+        <p className="label label-sm" style={{ marginBottom: 6 }}>Built with</p>
+        <p className={styles.stack}>{p.stack}</p>
+      </div>
+      {live ? (
+        <Link className="btn sketch" href={p.link} style={{ alignSelf: 'flex-start' }}>[{p.cta} →]</Link>
+      ) : (
+        // Copy shown on the turning leaf: same look, but no SVG filter to re-run every frame.
+        <span className={`btn ${styles.ghostBtn}`} style={{ alignSelf: 'flex-start' }}>[{p.cta} →]</span>
+      )}
+      <span className={styles.folio}>p. {pad(i * 2 + 2)}</span>
+    </div>
+  );
+}
+
+export function Sketchbook({ projects }: { projects: ProjectSummary[] }) {
+  const [index, setIndex] = useState(0);
+  const [turn, setTurn] = useState<Turn | null>(null);
+  const reducedMotion = useRef(false);
+  const swipeStart = useRef<number | null>(null);
+  const tabsRef = useRef<HTMLElement>(null);
+  const n = projects.length;
+
+  useEffect(() => {
+    const mq = window.matchMedia('(prefers-reduced-motion: reduce)');
+    reducedMotion.current = mq.matches;
+    const onChange = (e: MediaQueryListEvent) => (reducedMotion.current = e.matches);
+    mq.addEventListener('change', onChange);
+    return () => mq.removeEventListener('change', onChange);
+  }, []);
+
+  const goTo = useCallback(
+    (to: number) => {
+      if (turn || to === index || to < 0 || to >= n) return;
+      if (reducedMotion.current) return setIndex(to);
+      setTurn({ from: index, to, dir: to > index ? 'next' : 'prev' });
+    },
+    [turn, index, n],
+  );
+
+  function finishTurn(e: React.AnimationEvent) {
+    // Ignore the shading animation on the faces bubbling up; only the leaf's own turn counts.
+    if (!turn || e.target !== e.currentTarget) return;
+    setIndex(turn.to);
+    setTurn(null);
+  }
+
+  function onKeyDown(e: React.KeyboardEvent) {
+    if (e.key === 'ArrowRight') { e.preventDefault(); goTo(index + 1); }
+    if (e.key === 'ArrowLeft') { e.preventDefault(); goTo(index - 1); }
+  }
+
+  function onPointerDown(e: React.PointerEvent) {
+    if (e.pointerType !== 'mouse') swipeStart.current = e.clientX;
+  }
+  function onPointerUp(e: React.PointerEvent) {
+    if (swipeStart.current === null) return;
+    const dx = e.clientX - swipeStart.current;
+    swipeStart.current = null;
+    if (Math.abs(dx) > 50) goTo(index + (dx < 0 ? 1 : -1));
+  }
+
+  // Keep the current project's tab in view when the tab strip has to scroll (narrow screens).
+  const target = turn ? turn.to : index;
+  useEffect(() => {
+    const strip = tabsRef.current;
+    const tab = strip?.children[target] as HTMLElement | undefined;
+    if (!strip || !tab || strip.scrollWidth <= strip.clientWidth) return;
+    strip.scrollTo({ left: tab.offsetLeft - (strip.clientWidth - tab.offsetWidth) / 2, behavior: reducedMotion.current ? 'auto' : 'smooth' });
+  }, [target]);
+
+  // While a leaf is turning, the static pages show whatever the leaf will reveal / land on.
+  const leftIdx = turn ? (turn.dir === 'next' ? turn.from : turn.to) : index;
+  const rightIdx = turn ? (turn.dir === 'next' ? turn.to : turn.from) : index;
+  const shown = target;
+
+  return (
+    <div
+      className={styles.book}
+      role="region"
+      aria-roledescription="sketchbook"
+      aria-label="Projects sketchbook. Use the left and right arrow keys to turn pages."
+      tabIndex={0}
+      onKeyDown={onKeyDown}
+      onPointerDown={onPointerDown}
+      onPointerUp={onPointerUp}
+    >
+      <nav ref={tabsRef} className={styles.tabs} aria-label="Jump to project">
+        {projects.map((p, i) => (
+          <button
+            key={p.slug}
+            type="button"
+            className={styles.tab}
+            aria-current={i === shown ? 'page' : undefined}
+            onClick={() => goTo(i)}
+            style={{ '--tab-tilt': `${[-1.5, 1, -0.5, 1.5, -1, 0.5][i % 6]}deg` } as React.CSSProperties}
+          >
+            {p.title}
+          </button>
+        ))}
+      </nav>
+
+      <div className={styles.spread}>
+        <LeftPage p={projects[leftIdx]} i={leftIdx} live={!turn} />
+        <RightPage p={projects[rightIdx]} i={rightIdx} live={!turn} />
+
+        {turn && (
+          <div
+            className={`${styles.leaf} ${turn.dir === 'next' ? styles.leafNext : styles.leafPrev}`}
+            style={{ animationDuration: `${TURN_MS}ms`, '--turn-ms': `${TURN_MS}ms` } as React.CSSProperties}
+            onAnimationEnd={finishTurn}
+            aria-hidden="true"
+          >
+            <div className={styles.face}>
+              {turn.dir === 'next' ? <RightPage p={projects[turn.from]} i={turn.from} /> : <LeftPage p={projects[turn.from]} i={turn.from} />}
+            </div>
+            <div className={`${styles.face} ${styles.back}`}>
+              {turn.dir === 'next' ? <LeftPage p={projects[turn.to]} i={turn.to} /> : <RightPage p={projects[turn.to]} i={turn.to} />}
+            </div>
+          </div>
+        )}
+      </div>
+
+      <div className={styles.controls}>
+        <button type="button" className="btn" onClick={() => goTo(index - 1)} disabled={index === 0 || !!turn}>[← Prev]</button>
+        <span className="label" aria-hidden="true">{pad(shown + 1)} / {pad(n)}</span>
+        <button type="button" className="btn" onClick={() => goTo(index + 1)} disabled={index === n - 1 || !!turn}>[Next →]</button>
+      </div>
+
+      <p className="sr-only" aria-live="polite">
+        Project {shown + 1} of {n}: {projects[shown].title}
+      </p>
+    </div>
+  );
+}

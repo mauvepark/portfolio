@@ -1,7 +1,8 @@
 import Link from 'next/link';
 import { SiteHeader } from '@/components/SiteHeader';
 import { Hatch } from '@/components/sketch/PencilFilters';
-import { getNotes, getProjects, projectHref } from '@/lib/content';
+import { getNotes, getProjectSummaries } from '@/lib/content';
+import { ProjectsSection } from '@/components/projects/ProjectsSection';
 import { site } from '@/lib/site';
 import { Guestbook } from '@/components/guestbook/Guestbook';
 import { PAGE_SIZE, PUBLIC_COLUMNS, type Entry } from '@/lib/guestbook';
@@ -37,7 +38,6 @@ function SocialButtons({ order }: { order: ('resume' | 'linkedin' | 'github')[] 
 }
 
 export default async function Home() {
-  const projects = getProjects();
   const notes = getNotes();
   const wall = await getWall();
 
@@ -68,25 +68,7 @@ export default async function Home() {
         </div>
       </section>
 
-      {/* PROJECTS */}
-      <section id="projects" className="section">
-        <div className="section-head">
-          <h2 className="section-title">projects</h2>
-          <p className="label">Product · Engineering · Design</p>
-        </div>
-        <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(300px, 1fr))', gap: '40px 32px' }}>
-          {projects.map((p) => (
-            <article key={p.slug} className="card sketch">
-              <Hatch label={p.cover} height={180} />
-              <p className="label label-sm">{p.kind}</p>
-              <h3>{p.title}</h3>
-              <p className="card-blurb">{p.blurb}</p>
-              <p className="card-stack">{p.stack}</p>
-              <Link className="navlink" href={projectHref(p)}>[{p.cta} →]</Link>
-            </article>
-          ))}
-        </div>
-      </section>
+      <ProjectsSection projects={getProjectSummaries()} />
 
       {/* SKILLS */}
       <section id="skills" className="section">
