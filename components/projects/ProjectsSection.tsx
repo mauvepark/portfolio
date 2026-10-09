@@ -8,7 +8,7 @@ import { Sketchbook } from './Sketchbook';
 type View = 'book' | 'grid';
 const STORAGE_KEY = 'projects-view';
 
-export function ProjectsSection({ projects }: { projects: ProjectSummary[] }) {
+export function ProjectsSection({ projects, lead }: { projects: ProjectSummary[]; lead?: string }) {
   const [view, setView] = useState<View>('book');
 
   // Remember the visitor's choice (a convenience only; storage may be unavailable).
@@ -32,6 +32,7 @@ export function ProjectsSection({ projects }: { projects: ProjectSummary[] }) {
           {view === 'book' ? '[View as grid]' : '[Open the sketchbook]'}
         </button>
       </div>
+      {lead && <p className="lede" style={{ margin: '-12px 0 36px', maxWidth: 760 }}>{lead}</p>}
       {view === 'book' ? <Sketchbook projects={projects} /> : <ProjectGrid projects={projects} />}
     </section>
   );

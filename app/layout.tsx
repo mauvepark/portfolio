@@ -9,7 +9,7 @@ const plexMono = IBM_Plex_Mono({ subsets: ['latin'], weight: ['400', '500'], var
 
 export const metadata: Metadata = {
   title: 'Noor Ali — Portfolio',
-  description: 'Noor Ali — software engineering student building toward product management. Projects, skills and notes.',
+  description: 'Noor Ali — software engineering student with a background in biological sciences and a growing focus in product management.',
 };
 
 export default function RootLayout({ children }: { children: React.ReactNode }) {

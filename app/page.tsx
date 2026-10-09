@@ -64,8 +64,8 @@ export default async function Home() {
             <span className={styles.line} style={{ color: 'var(--accent)' }}>I build things</span>
             <span className={styles.line}>and sketch the why.</span>
           </h1>
-          <p className={`lede ${styles.lede}`}>I&apos;m a third-year software engineering student at the University of Calgary (Schulich), with a previous degree in biological sciences. I like the space where design, engineering and people meet, which is why I&apos;m heading toward product management while still building as an engineer.</p>
-          <p className={`lede ${styles.lede}`}>Right now I&apos;m Co-VP Internal at ZOO, our software &amp; electrical engineering society, leading a team of four on marketing and operations for 1,300+ members.</p>
+          <p className={`lede ${styles.lede}`}>I&apos;m a software engineering student with a background in biological sciences and a growing focus in product management. I started out studying biological sciences before switching into software, but my guiding principle has always been the same:</p>
+          <p className={`hand ${styles.principle}`}>I like figuring out how complex systems work, then making them work better!</p>
           <div className="btn-row">
             <SocialButtons order={['resume', 'linkedin', 'github']} />
           </div>
@@ -75,7 +75,10 @@ export default async function Home() {
 
       <Workbench />
 
-      <ProjectsSection projects={getProjectSummaries()} />
+      <ProjectsSection
+        projects={getProjectSummaries()}
+        lead="That curiosity is what pulled me into product. Most recently I built Ramble, an AI-powered journaling app, from scratch: I wrote the PRD, benchmarked competing apps to shape the roadmap, and built it end to end with Next.js, Supabase and the Claude API. Before that, I grew an online community from zero to 1,500+ members, led the creation of a full-stack tool for League of Legends teams, and redesigned recruitment for a University of Calgary engineering team, more than doubling its membership."
+      />
 
       {/* SKILLS */}
       <section id="skills" className="section">
@@ -90,12 +93,12 @@ export default async function Home() {
         </div>
         <div style={{ display: 'flex', flexWrap: 'wrap', alignItems: 'baseline', gap: '10px 22px', marginTop: 40 }}>
           <p className="hand" style={{ margin: 0, fontSize: 30, fontWeight: 700 }}>off the clock:</p>
-          <p style={{ margin: 0, fontSize: 18 }}>drawing · journaling · gaming · volleyball</p>
+          <p style={{ margin: 0, fontSize: 18 }}>I&apos;m usually scrolling through Pinterest, solving my daily NYT games, or critiquing the city&apos;s newest cafe.</p>
         </div>
       </section>
 
       <NotesSection
-        notes={notes.map(({ slug, title, date }) => ({ slug, title, date }))}
+        notes={notes.map(({ slug, title, date, category, tldr }) => ({ slug, title, date, category, tldr }))}
         bodies={Object.fromEntries(notes.map((n) => [n.slug, <Prose key={n.slug} source={n.body} />]))}
       />
 
@@ -104,8 +107,8 @@ export default async function Home() {
       {/* CONTACT */}
       <section id="contact" style={{ padding: '24px 0 64px' }}>
         <div className="sketch" style={{ background: 'var(--card)', padding: '56px 40px', display: 'flex', flexDirection: 'column', alignItems: 'center', textAlign: 'center', gap: 18 }}>
-          <h2 className="hand" style={{ margin: 0, fontWeight: 700, fontSize: 'clamp(56px, 9vw, 76px)', lineHeight: 1 }}>let&apos;s talk.</h2>
-          <p className="lede" style={{ maxWidth: 520 }}>Hiring for a PM or SWE intern, building something fun, or just want to swap sketchbook pages? My inbox is open.</p>
+          <h2 className="hand" style={{ margin: 0, fontWeight: 700, fontSize: 'clamp(56px, 9vw, 76px)', lineHeight: 1 }}>let&apos;s connect!</h2>
+          <p className="lede" style={{ maxWidth: 520 }}>I&apos;d be happy to chat, so check out my social links below. Thanks for stopping by!</p>
           <a href={`mailto:${site.email}`} style={{ fontFamily: 'var(--font-mono)', fontSize: 20, letterSpacing: '.04em', color: 'var(--accent)', overflowWrap: 'anywhere' }}>{site.email}</a>
           <div className="btn-row" style={{ justifyContent: 'center', marginTop: 8 }}>
             <SocialButtons order={['linkedin', 'github', 'resume']} />
