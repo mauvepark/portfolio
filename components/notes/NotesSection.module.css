@@ -8,6 +8,10 @@
   border: 0; border-top: 1.5px solid var(--graphite); border-radius: 0;
 }
 
+/* Title with its one-line TL;DR underneath. */
+.rowTitle { display: flex; flex-direction: column; gap: 4px; }
+.rowTldr { font-size: 16px; font-weight: 400; line-height: 1.45; color: var(--graphite-soft); }
+
 /* ---------- the note card ---------- */
 .dialog {
   width: min(760px, calc(100vw - 32px)); max-height: calc(100dvh - 48px);
@@ -27,6 +31,7 @@
 .scroll { max-height: calc(100dvh - 170px); overflow-y: auto; overscroll-behavior: contain; padding-bottom: 40px; }
 .cardHead { display: flex; justify-content: space-between; align-items: center; gap: 12px; }
 .cardHead form { margin: 0; }
+.tldr { margin: 4px 0 8px; font-size: 18px; line-height: 1.55; color: var(--graphite-soft); max-width: 680px; }
 .title { margin: 6px 0 4px; font-family: var(--font-hand); font-size: clamp(38px, 6vw, 56px); font-weight: 700; line-height: 1; }
 
 @media (max-width: 640px) {

@@ -3,7 +3,7 @@
 import { useCallback, useEffect, useRef, useState } from 'react';
 import styles from './NotesSection.module.css';
 
-type NoteMeta = { slug: string; title: string; date: string };
+type NoteMeta = { slug: string; title: string; date: string; category?: string; tldr?: string };
 
 const PREVIEW = 4;
 const hashFor = (slug: string) => `#note-${slug}`;
@@ -62,7 +62,10 @@ export function NotesSection({ notes, bodies }: { notes: NoteMeta[]; bodies: Rec
           <li key={n.slug}>
             <button type="button" className={`row ${styles.row}`} onClick={() => show(n.slug)} aria-haspopup="dialog">
               <span className="row-date">{n.date}</span>
-              <span className="row-title">{n.title}</span>
+              <span className={`row-title ${styles.rowTitle}`}>
+                {n.title}
+                {n.tldr && <span className={styles.rowTldr}>{n.tldr}</span>}
+              </span>
               <span className="navlink" style={{ minHeight: 0 }}>[Read]</span>
             </button>
           </li>
@@ -79,13 +82,14 @@ export function NotesSection({ notes, bodies }: { notes: NoteMeta[]; bodies: Rec
           <article className={`sketch ${styles.card}`}>
             <div className="tape" aria-hidden="true" />
             <header className={styles.cardHead}>
-              <p className="label label-sm">{open.date}</p>
+              <p className="label label-sm">{[open.category, open.date].filter(Boolean).join(' · ')}</p>
               <form method="dialog">
                 <button className="navlink" aria-label="Close note" style={{ background: 'none', border: 0, cursor: 'pointer', color: 'var(--ink)' }}>[Close ×]</button>
               </form>
             </header>
             <div className={styles.scroll}>
               <h3 id="note-dialog-title" className={styles.title}>{open.title}</h3>
+              {open.tldr && <p className={styles.tldr}><strong>TL;DR</strong> {open.tldr}</p>}
               {bodies[open.slug]}
             </div>
           </article>

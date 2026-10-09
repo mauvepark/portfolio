@@ -18,7 +18,7 @@ export type Project = {
   body: string;
 };
 
-export type Note = { slug: string; title: string; date: string; body: string };
+export type Note = { slug: string; title: string; date: string; category?: string; tldr?: string; body: string };
 
 function readDir<T>(dir: string): T[] {
   const full = path.join(root, dir);

@@ -1,0 +1,179 @@
+---
+title: "Ramble PRD: Weekly Insights v2"
+date: "2026-10-08"
+category: Product Specs
+tldr: "A PRD outlining a weekly AI reflection feature for Ramble, my journaling app, scoped to what the current single-user build can support"
+---
+
+## Overview
+
+Weekly Insights adds a weekly, on-demand reflection to single-user Ramble by reusing the existing monthly insight, and adds a simple event log so the feature's use can be checked honestly.
+
+- **Product:** Ramble, an AI journaling web app (Next.js, Supabase/PostgreSQL, Claude API)
+- **Today:** single-user, protected by one shared passphrase, with no accounts and no access rules. Not yet deployed. The only AI feature is a monthly insight: one Claude call over the month's entries returns a top emotion, an emotion breakdown, notable events and a short summary. It is generated when opened and cached until entries change. Individual entries are not scored, and there is no weekly summary.
+- **This release:** a weekly version of that insight, one reflection prompt that opens a new entry, and a local event log
+- **Out of scope:** user accounts (Supabase Auth), per-entry sentiment scoring, scheduled background generation, notifications, mobile apps. Each is listed under Future prerequisites.
+
+## Problem
+
+A monthly insight comes too late to act on, it doesn't lead back into writing, and there is no record of whether it gets used.
+
+- **Too slow a loop.** A month is long enough that the moments behind a mood shift are forgotten by the time the insight appears.
+- **No next step.** The insight ends with a summary. Nothing turns it into the next entry.
+- **No measurement.** Ramble stores entries but no product events, so even its one user can't see how often insights are opened or acted on.
+
+These are hypotheses from building and using the app myself. They need checking with a few other journalers once Ramble is deployed (see Open questions).
+
+## Users and goals
+
+The user for this release is Ramble's one user: a casual journaler who writes a few times a week and wants to notice mood patterns without doing the analysis.
+
+**Job to be done:** "At the end of the week, help me see what affected how I felt, so I can do more of what helps."
+
+### Goals
+
+- A weekly insight worth opening, built on the code that already powers the monthly one
+- The insight leads to the next journal entry
+- A usage record that is honest at n = 1
+
+### Non-goals
+
+- Supporting more than one user
+- Clinical or diagnostic language of any kind
+- Changing or replacing the monthly insight
+
+## User flow
+
+The weekly insight is generated the way the monthly one is: on demand when opened, then cached. One tap takes the user from reading to writing.
+
+1. User journals during the week as today. Entries are stored as-is, with no per-entry scoring.
+2. User enters the passphrase and sees a "This week" card on the dashboard.
+3. Fewer than 3 entries in the last 7 days: the card shows how many more entries are needed, and no Claude call is made.
+4. User opens the card. If a cached insight exists for this week and no entries have changed since, it loads from the cache. Otherwise one Claude call runs over the week's entries while the user waits, and the result is cached.
+5. The insight shows the week's top emotion, an emotion breakdown, notable moments, a short summary, and one reflection prompt.
+6. User taps "Write about this". A new entry opens with the prompt pre-filled.
+7. User marks the insight helpful or not helpful.
+
+## Requirements
+
+Five P0 requirements make the release, all buildable on today's single-user app. Accounts, per-entry scoring and scheduling are deliberately excluded.
+
+| ID | Requirement | Priority |
+|---|---|---|
+| R1 | Extend the existing insight generator (`lib/anthropic/insights.ts`) to accept a 7-day range and produce a weekly insight from that week's raw entries, only when there are 3+ entries | P0 |
+| R2 | Reuse the existing cache for weekly insights: one cached result per week, regenerated only when that week's entries change | P0 |
+| R3 | Weekly insight shows top emotion, emotion breakdown, notable moments, short summary, and one reflection prompt | P0 |
+| R4 | "This week" dashboard card with an empty state, and "Write about this" opening a new entry with the prompt pre-filled | P0 |
+| R5 | Log product events (insight generated, viewed, prompt used, rated) to an events table | P0 |
+| R6 | Helpful / not helpful rating on each weekly insight | P1 |
+| R7 | Weekly window setting: rolling 7 days or calendar week (single app-wide setting) | P1 |
+
+### Non-functional
+
+- Generation stays on demand, as today. No scheduler or background job.
+- Access is still the shared passphrase. No row-level security or per-user data, consistent with the current migration.
+- Insight text avoids clinical or diagnostic terms, and the Claude prompt says so explicitly.
+- A cached weekly insight loads without calling Claude, so normal browsing makes no repeat API calls.
+
+## Acceptance criteria
+
+Each P0 is done when every check under it passes on a local build.
+
+### R1: Weekly generation
+
+- Given 3+ entries in the week, when the card is opened with no valid cache, then exactly one Claude call runs over that week's entries
+- Given 0 to 2 entries in the week, when the card is opened, then no Claude call is made and the empty state shows
+- Given the monthly insight is opened, then it behaves exactly as before
+
+### R2: Cache
+
+- Given a cached weekly insight and no changed entries, when the card is reopened, then no Claude call is made
+- Given an entry in that week is added or edited, when the card is reopened, then the insight is regenerated once
+- Given the card is opened twice in a row, then only one cached row exists for that week
+
+### R3: Insight content
+
+- Given a weekly insight, then it shows top emotion, breakdown, notable moments, summary, and exactly one reflection prompt
+- Given any generated text, then it contains none of the words on the blocked clinical-terms list
+
+### R4: Card and prompt
+
+- Given a weekly insight exists, then the "This week" card appears on the dashboard above the monthly insight
+- Given the user taps "Write about this", then a new entry opens with the prompt pre-filled and editable
+- Given that entry is saved, then it stores which week's insight it came from
+
+### R5: Event log
+
+- Given each of the four actions (generated, viewed, prompt used, rated), then one event row is written with the week, event name and timestamp
+- Given an event write fails, then the user's action still succeeds
+
+## Success metrics and instrumentation
+
+With one user, ratios across a population mean nothing. So this release is judged on a personal 6-week usage check, and the event log is built now so real metrics can run once more people use Ramble.
+
+| Check (one user, 6 weeks) | How it's measured | Pass if |
+|---|---|---|
+| Insight gets opened | Weeks with an `insight_viewed` event | 5 of 6 weeks |
+| Insight leads to writing | Weeks with a `prompt_used` event | 3 of 6 weeks |
+| Insight feels useful | Helpful ratings out of all ratings | Most weeks rated helpful |
+| Cost stays flat | `insight_generated` events per week | 1 to 2 per week (cache working) |
+
+The pass thresholds are my own targets for a solo trial, not benchmarks.
+
+### Events table (Supabase, single-user)
+
+```sql
+create table events (
+  id          bigint generated always as identity primary key,
+  week_start  date not null,
+  event_name  text not null check (event_name in
+                ('insight_generated','insight_viewed','prompt_used','insight_rated')),
+  properties  jsonb default '{}',
+  created_at  timestamptz not null default now()
+);
+```
+
+There is no `user_id` column, since there are no accounts. Adding one is part of the accounts prerequisite below.
+
+### Weekly usage check
+
+```sql
+select
+  week_start,
+  count(*) filter (where event_name = 'insight_generated') as generations,
+  bool_or(event_name = 'insight_viewed')                   as viewed,
+  bool_or(event_name = 'prompt_used')                      as wrote_from_prompt
+from events
+group by week_start
+order by week_start desc;
+```
+
+## Risks, trade-offs and open questions
+
+The biggest risk is a weekly insight built on too little writing that reads as wrong; the 3-entry minimum and the rating are the main defences.
+
+| Risk or trade-off | Mitigation |
+|---|---|
+| A week's worth of entries is too thin for confident themes | 3-entry minimum; show "based on 4 entries" on the card |
+| Insight on a hard week reads as clinical or upsetting | Blocked-terms check; supportive tone in the prompt; reflection only, no advice |
+| On-demand generation makes the user wait | Cache means the wait happens at most once per week, or after an edit |
+| Scope trade-off: multi-user features cut | Kept as named prerequisites below, not silently dropped |
+
+### Open questions
+
+- Does a weekly insight actually beat the monthly one? Run the 6-week solo check, then ask 3 to 5 journalers once Ramble is deployed
+- Rolling 7 days or calendar week as the default window?
+- Should the weekly and monthly insights share one cache table or use separate ones?
+
+## Future prerequisites
+
+These are required before Ramble can have the multi-user version of this feature. Each is its own project, larger than this release.
+
+| Prerequisite | What it unlocks |
+|---|---|
+| Deploy Ramble (e.g. Vercel) | Anyone besides me can use it; real usage data |
+| User accounts (Supabase Auth, listed in the README as a v2 idea) | `user_id` on entries, insights and events; per-user settings |
+| Row-level security on all tables | Private insights per user, replacing the shared passphrase |
+| Per-entry sentiment scoring | Day-level mood trends and "best and lowest day" themes |
+| Scheduled generation (e.g. Vercel Cron) | Insights ready before the user opens the app |
+| Cohort metrics (view rate, prompt-to-entry rate, retention) | Meaningful only with accounts, deployment and many users |
