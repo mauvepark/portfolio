@@ -1,0 +1,17 @@
+:root{--accent:#A8432E;--ink:#262624;--paper:#F3F1EC;--card:#FBFAF7;--muted:#55534E}
+html{scroll-behavior:smooth}
+body{margin:0;background:#F3F1EC;color:#262624;font-family:'Karla',system-ui,sans-serif}
+a{color:#262624;text-decoration:none}
+a:hover{color:#000;text-decoration:underline;text-decoration-thickness:1.5px;text-underline-offset:4px}
+.paper{background-color:#F3F1EC;background-image:radial-gradient(rgba(38,38,36,.07) 1px,transparent 1.2px);background-size:22px 22px}
+.sketch{position:relative}
+.sketch::before{content:"";position:absolute;inset:0;border:1.7px solid #2E2E2B;border-radius:4px 9px 5px 8px;filter:url(#pencil);pointer-events:none}
+.sketch::after{content:"";position:absolute;inset:3px -2px -2px 3px;border:1px solid rgba(46,46,43,.35);border-radius:7px 4px 9px 5px;filter:url(#pencil2);pointer-events:none}
+.hatch{background-color:#ECE9E2;background-image:repeating-linear-gradient(-45deg,rgba(46,46,43,.16) 0 1.2px,transparent 1.2px 9px)}
+.btn{display:inline-flex;align-items:center;min-height:44px;padding:0 18px;font-family:'IBM Plex Mono',monospace;font-size:14px;letter-spacing:.06em;text-transform:uppercase}
+.btn:hover{background:#262624;color:#F3F1EC;text-decoration:none}
+.navlink{font-family:'IBM Plex Mono',monospace;font-size:14px;letter-spacing:.08em;text-transform:uppercase;display:inline-flex;align-items:center;min-height:44px}
+.card{transition:transform .2s ease}
+.card:hover{transform:rotate(-.6deg) translateY(-3px)}
+.row:hover{background:rgba(46,46,43,.05)}
+@media (prefers-reduced-motion: reduce){.card,.card:hover{transition:none;transform:none}}
