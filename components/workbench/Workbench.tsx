@@ -13,6 +13,19 @@ function timeAgo(iso: string) {
   return daysAgo < 30 ? `${daysAgo}d ago` : new Date(iso).toLocaleDateString('en-CA', { month: 'short', day: 'numeric' });
 }
 
+/** A push pin seen from above: red head, small highlight, soft shadow on the paper. */
+function Pin() {
+  return (
+    <svg className={styles.pin} viewBox="0 0 28 28" aria-hidden="true">
+      <ellipse cx="16.5" cy="17.5" rx="9" ry="8" fill="rgba(38,38,36,.22)" />
+      <circle cx="13" cy="13" r="9" fill="var(--accent)" />
+      <circle cx="13" cy="13" r="9" fill="none" stroke="rgba(38,38,36,.35)" strokeWidth="1" />
+      <circle cx="13" cy="13" r="5" fill="rgba(0,0,0,.12)" />
+      <ellipse cx="10.4" cy="9.8" rx="2.6" ry="1.8" fill="rgba(255,255,255,.55)" transform="rotate(-35 10.4 9.8)" />
+    </svg>
+  );
+}
+
 /** "On my desk": what I'm building now, plus live GitHub activity. GitHub notes hide if the API is unavailable. */
 export async function Workbench() {
   const gh = await getGithubActivity();
@@ -25,17 +38,11 @@ export async function Workbench() {
         <p className="label">{gh ? 'Live from GitHub' : `Updated ${now.updated}`}</p>
       </div>
 
-      {/* A taped-down sheet of graph paper the notes sit on. */}
-      <div className={`sketch ${styles.blotter}`}>
-        <div className={`tape ${styles.tapeLeft}`} aria-hidden="true" />
-        <div className={`tape ${styles.tapeRight}`} aria-hidden="true" />
-        <svg className={styles.coffeeRing} viewBox="0 0 120 120" aria-hidden="true">
-          <circle cx="60" cy="60" r="46" />
-          <circle cx="60" cy="60" r="41" strokeDasharray="60 14 110 20" />
-        </svg>
+      {/* A pencil-drawn corkboard; each note hangs from a push pin. */}
+      <div className={`sketch ${styles.board}`}>
       <ul className={styles.desk}>
         <li className={styles.note} style={{ '--tilt': '-1.6deg' } as React.CSSProperties}>
-          <div className="tape" aria-hidden="true" />
+          <Pin />
           <p className="label label-sm">Currently building</p>
           <p className={styles.big}>{now.building}</p>
           {!placeholder(now.learning) && (
@@ -48,7 +55,7 @@ export async function Workbench() {
 
         {gh && (
           <li className={styles.note} style={{ '--tilt': '1.2deg' } as React.CSSProperties}>
-            <div className="tape" aria-hidden="true" />
+            <Pin />
             <p className="label label-sm">Last 30 days on GitHub</p>
             <p className={styles.stat}>
               {gh.last30}
@@ -61,7 +68,7 @@ export async function Workbench() {
 
         {gh && gh.repos.length > 0 && (
           <li className={styles.note} style={{ '--tilt': '-0.8deg' } as React.CSSProperties}>
-            <div className="tape" aria-hidden="true" />
+            <Pin />
             <p className="label label-sm">Last pushed</p>
             <ul className={styles.repos}>
               {gh.repos.map((r) => (

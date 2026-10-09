@@ -1,27 +1,21 @@
-/* ---------- the desk blotter: light graph paper, taped down ---------- */
-.blotter {
-  --grid: rgba(46, 46, 43, .06);
-  --grid-major: rgba(46, 46, 43, .11);
-  padding: 44px 40px 48px;
-  background-color: #F7F5F0;
+/* ---------- corkboard: speckled, framed, drawn in graphite ---------- */
+.board {
+  padding: 48px 40px 44px;
+  background-color: #E8E3D9;
+  /* Layered speckles at co-prime sizes read as cork grain without an image. */
   background-image:
-    linear-gradient(var(--grid-major) 1px, transparent 1px),
-    linear-gradient(90deg, var(--grid-major) 1px, transparent 1px),
-    linear-gradient(var(--grid) 1px, transparent 1px),
-    linear-gradient(90deg, var(--grid) 1px, transparent 1px);
-  background-size: 120px 120px, 120px 120px, 24px 24px, 24px 24px;
-  background-position: -1px -1px;
+    radial-gradient(rgba(46, 46, 43, .13) 0.8px, transparent 1.3px),
+    radial-gradient(rgba(46, 46, 43, .09) 1px, transparent 1.6px),
+    radial-gradient(rgba(255, 255, 255, .55) 0.9px, transparent 1.4px),
+    radial-gradient(rgba(46, 46, 43, .07) 1.4px, transparent 2.2px);
+  background-size: 7px 9px, 11px 13px, 9px 7px, 17px 19px;
+  background-position: 0 0, 3px 5px, 5px 2px, 8px 11px;
+  /* Inner frame edge and a soft recess, so the board sits inside its frame. */
+  box-shadow: inset 0 0 0 7px var(--card), inset 0 0 0 8.2px rgba(46, 46, 43, .45), inset 0 3px 10px 8px rgba(38, 38, 36, .12);
 }
-.blotter > .tapeLeft, .blotter > .tapeRight { top: -12px; width: 84px; height: 24px; margin-left: 0; }
-.blotter > .tapeLeft { left: 36px; transform: rotate(-5deg); }
-.blotter > .tapeRight { left: auto; right: 36px; transform: rotate(4deg); }
 
-/* A faint coffee-cup ring in the corner, drawn in pencil. */
-.coffeeRing {
-  position: absolute; right: 28px; bottom: 18px; width: 110px; height: 110px;
-  fill: none; stroke: var(--graphite); stroke-width: 3; opacity: .1;
-  filter: url(#pencil); pointer-events: none;
-}
+/* Push pin: sits at the top centre of each note, head pressed into the cork. */
+.pin { position: absolute; top: -12px; left: 50%; width: 28px; height: 28px; margin-left: -14px; z-index: 1; pointer-events: none; }
 
 .desk {
   position: relative; list-style: none; margin: 0; padding: 0;
@@ -29,7 +23,7 @@
 }
 
 .note {
-  position: relative; background: var(--card); padding: 26px 24px 20px;
+  position: relative; background: var(--card); padding: 28px 24px 20px;
   display: flex; flex-direction: column; gap: 6px;
   box-shadow: 0 1px 0 rgba(0, 0, 0, .05), 0 8px 18px -12px rgba(0, 0, 0, .3);
   transform: rotate(var(--tilt));
@@ -62,8 +56,7 @@
 .commit { display: block; font-size: 15px; line-height: 1.4; color: var(--graphite-soft); overflow-wrap: anywhere; }
 
 @media (max-width: 640px) {
-  .blotter { padding: 36px 18px 40px; }
-  .coffeeRing { width: 80px; height: 80px; right: 12px; bottom: 10px; }
+  .board { padding: 40px 20px 36px; }
 }
 
 @media (prefers-reduced-motion: reduce) {
