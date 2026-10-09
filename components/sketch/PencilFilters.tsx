@@ -28,9 +28,9 @@ export function PencilRule() {
   );
 }
 
-export function Hatch({ label, height, width }: { label: string; height: number; width?: number }) {
+export function Hatch({ label, height, width, className }: { label: string; height?: number; width?: number; className?: string }) {
   return (
-    <div className="hatch" style={{ height, width }}>
+    <div className={className ? `hatch ${className}` : 'hatch'} style={{ height, width }}>
       <span className="hatch-label">[{label}]</span>
     </div>
   );

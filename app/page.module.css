@@ -1,0 +1,40 @@
+/*
+ * Intro: fills the window below the sticky header, and scales type, spacing and the photo
+ * with the window's HEIGHT (vh), so the whole intro is on screen at load even in short
+ * browser windows. Tall/wide screens hit the clamp maximums and look as before.
+ */
+.intro {
+  min-height: calc(100svh - var(--header-h, 90px));
+  box-sizing: border-box;
+  display: flex; flex-wrap: wrap; align-items: center; align-content: center;
+  gap: clamp(20px, 4vh, 40px) clamp(28px, 4.5vw, 56px);
+  padding: clamp(12px, 4vh, 72px) 0;
+}
+
+.photoCol { flex: 0 1 auto; display: flex; justify-content: center; }
+.photo {
+  margin: 0; transform: rotate(-3deg); background: var(--card);
+  padding: clamp(10px, 1.8vh, 16px) clamp(10px, 1.8vh, 16px) clamp(12px, 2.2vh, 20px);
+  box-shadow: 0 2px 0 rgba(0, 0, 0, .04);
+}
+.photoImg { width: clamp(140px, 30vh, 240px); aspect-ratio: 240 / 260; }
+/* width: 0 + min-width: 100% lets the caption wrap to the photo's width instead of stretching the card. */
+.photo .caption { width: 0; min-width: 100%; text-align: center; margin-top: clamp(6px, 1.4vh, 12px); font-size: clamp(19px, 3.2vh, 26px); }
+
+.text { flex: 999 1 380px; min-width: 0; display: flex; flex-direction: column; gap: clamp(8px, 2.2vh, 22px); }
+.headline { margin: 0; font-weight: 700; line-height: .95; font-size: clamp(40px, min(6.4vw, 10vh), 84px); }
+.text .lede { max-width: 680px; font-size: clamp(16px, 2.4vh, 19px); line-height: 1.55; }
+.text .open { font-size: clamp(20px, 3.4vh, 26px); }
+
+/* Phones: stack, with a smaller tilted photo so the text starts sooner. */
+@media (max-width: 700px) {
+  .intro { min-height: 0; padding: 20px 0 48px; gap: 18px; }
+  .photoCol { width: 100%; }
+  .photoImg { width: 120px; }
+  .photo .caption { font-size: 18px; }
+  .text { gap: 14px; }
+  .text .lede { font-size: 16px; line-height: 1.5; }
+}
+
+/* Tape scales with the photo so it doesn't swamp it in short windows. */
+.photo > :global(.tape) { --tape-w: clamp(60px, 13vh, 96px); width: var(--tape-w); margin-left: calc(var(--tape-w) / -2); height: clamp(20px, 3.4vh, 28px); }
