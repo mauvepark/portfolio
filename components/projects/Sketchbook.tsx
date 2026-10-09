@@ -12,41 +12,9 @@ type Turn = { from: number; to: number; dir: 'next' | 'prev' };
 const TURN_MS = 750;
 const pad = (n: number) => String(n).padStart(2, '0');
 
-// Spiral binding: holes (on each page, so they turn with the leaf) and coils (over the gutter)
-// share one position formula, so every coil end lands in a hole at any book height.
-const RINGS = 14;
-const ringTop = (i: number) => `calc(18px + (100% - 36px) * ${(i + 0.5) / RINGS})`;
-const rings = Array.from({ length: RINGS }, (_, i) => i);
-
-function Holes() {
-  return (
-    <>
-      {rings.map((i) => (
-        <span key={i} className={styles.hole} style={{ top: ringTop(i) }} aria-hidden="true" />
-      ))}
-    </>
-  );
-}
-
-function Coils() {
-  return (
-    <div className={styles.coils} aria-hidden="true">
-      {rings.map((i) => (
-        <svg key={i} className={styles.coil} style={{ top: ringTop(i) }} viewBox="0 0 44 16" width={44} height={16}>
-          {/* soft shadow on the paper, the wire, then a thin highlight */}
-          <path d="M8.5 14 C 11 5, 33 5, 35.5 14" stroke="rgba(38,38,36,.16)" strokeWidth={2.6} />
-          <path d="M8.5 12 C 10.5 1.5, 33.5 1.5, 35.5 12" stroke="var(--graphite)" strokeWidth={2.2} />
-          <path d="M12.5 7.6 C 17 3.4, 27 3.4, 31.5 7.6" stroke="rgba(255,255,255,.55)" strokeWidth={0.8} />
-        </svg>
-      ))}
-    </div>
-  );
-}
-
 function LeftPage({ p, i, live }: { p: ProjectSummary; i: number; live?: boolean }) {
   return (
     <div className={`${styles.page} ${styles.left}`}>
-      <Holes />
       <div className={styles.cover}>
         <Hatch label={p.cover} height={220} />
       </div>
@@ -62,7 +30,6 @@ function LeftPage({ p, i, live }: { p: ProjectSummary; i: number; live?: boolean
 function RightPage({ p, i, live }: { p: ProjectSummary; i: number; live?: boolean }) {
   return (
     <div className={`${styles.page} ${styles.right}`}>
-      <Holes />
       <p className={styles.blurb}>{p.blurb}</p>
       <div>
         <p className="label label-sm" style={{ marginBottom: 6 }}>Built with</p>
@@ -169,7 +136,6 @@ export function Sketchbook({ projects }: { projects: ProjectSummary[] }) {
       <div className={styles.spread}>
         <LeftPage p={projects[leftIdx]} i={leftIdx} live={!turn} />
         <RightPage p={projects[rightIdx]} i={rightIdx} live={!turn} />
-        <Coils />
 
         {turn && (
           <div
