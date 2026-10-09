@@ -23,10 +23,20 @@ async function getWall(): Promise<Entry[]> {
   return (data as Entry[] | null) ?? [];
 }
 
+// Sourced from the resume (public/resume.pdf): what's backed by real projects and roles.
 const skills = [
-  { title: 'Product', items: ['PRDs & product teardowns', 'RICE & MoSCoW prioritization', 'User & competitor research', 'Agile: sprint planning, backlogs', 'Translating between design, eng & stakeholders'] },
-  { title: 'Engineering', items: ['Java · C · MicroPython · JavaScript', 'React · Next.js · Node.js · Tailwind', 'Supabase · Claude API', 'Embedded systems & sensors', 'Power BI'] },
-  { title: 'Design', items: ['Figma · Canva', 'Brand identity: logo, type, color', 'Illustration & character design', 'Visual systems for progress & rewards'] },
+  {
+    title: 'Languages & Frameworks',
+    items: ['TypeScript · JavaScript · SQL', 'Python · Java · C/C++', 'React · Next.js · Node.js', 'Express · Tailwind CSS', 'HTML/CSS · MicroPython', 'Pandas · NumPy'],
+  },
+  {
+    title: 'Tools & Technologies',
+    items: ['Supabase · PostgreSQL · REST APIs', 'Git/GitHub · CI/CD · Linux', 'Claude API · Claude Code · Cursor', 'Power BI · DAX · Power Query', 'Jira · Figma', 'PyTest · JUnit · TDD'],
+  },
+  {
+    title: 'Product Skills',
+    items: ['User research & usability testing', 'Competitive & market analysis', 'Roadmapping & backlog prioritization', 'PRDs & success metrics', 'Requirements gathering & stakeholder management', 'Agile/Scrum & sprint planning', 'UI/UX design & prototyping'],
+  },
 ];
 
 function SocialButtons({ order }: { order: ('resume' | 'linkedin' | 'github')[] }) {
