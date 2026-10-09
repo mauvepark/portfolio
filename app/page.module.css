@@ -21,10 +21,23 @@
 /* width: 0 + min-width: 100% lets the caption wrap to the photo's width instead of stretching the card. */
 .photo .caption { width: 0; min-width: 100%; text-align: center; margin-top: clamp(6px, 1.4vh, 12px); font-size: clamp(19px, 3.2vh, 26px); }
 
-.text { flex: 999 1 380px; min-width: 0; display: flex; flex-direction: column; gap: clamp(8px, 2.2vh, 22px); }
-.headline { margin: 0; font-weight: 700; line-height: .95; font-size: clamp(40px, min(6.4vw, 10vh), 84px); }
+.text { flex: 999 1 380px; min-width: 0; container-type: inline-size; display: flex; flex-direction: column; gap: clamp(8px, 2.2vh, 22px); }
+/*
+ * Always three lines. The longest ("and sketch the why.") is 6.92x the font size wide, so
+ * 13.8cqi (13.8% of the text column) keeps it on one line at any width; the vh term keeps
+ * the three lines short enough for the whole intro to fit the window's height.
+ */
+.headline { margin: 0; font-weight: 700; line-height: .95; font-size: clamp(28px, min(13.8cqi, 8.6vh), 84px); }
+.line { display: block; white-space: nowrap; }
 .text .lede { max-width: 680px; font-size: clamp(16px, 2.4vh, 19px); line-height: 1.55; }
 .text .open { font-size: clamp(20px, 3.4vh, 26px); }
+
+/* Very short windows (small laptop with toolbars, bookmarks bar): tighten so the intro still fits. */
+@media (min-width: 701px) and (max-height: 560px) {
+  .intro { padding: 8px 0; }
+  .headline { font-size: clamp(28px, min(13.8cqi, 7.4vh), 84px); }
+  .text { gap: clamp(6px, 1.5vh, 22px); }
+}
 
 /* Phones: stack, with a smaller tilted photo so the text starts sooner. */
 @media (max-width: 700px) {

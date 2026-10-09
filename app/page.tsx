@@ -60,7 +60,9 @@ export default async function Home() {
         <div className={styles.text}>
           <p className="label">Software engineering · Product · Design</p>
           <h1 className={`hand ${styles.headline}`}>
-            hi, I&apos;m Noor.<br /><span style={{ color: 'var(--accent)' }}>I build things</span> and sketch the why.
+            <span className={styles.line}>hi, I&apos;m Noor.</span>
+            <span className={styles.line} style={{ color: 'var(--accent)' }}>I build things</span>
+            <span className={styles.line}>and sketch the why.</span>
           </h1>
           <p className={`lede ${styles.lede}`}>I&apos;m a third-year software engineering student at the University of Calgary (Schulich), with a previous degree in biological sciences. I like the space where design, engineering and people meet, which is why I&apos;m heading toward product management while still building as an engineer.</p>
           <p className={`lede ${styles.lede}`}>Right now I&apos;m Co-VP Internal at ZOO, our software &amp; electrical engineering society, leading a team of four on marketing and operations for 1,300+ members.</p>
