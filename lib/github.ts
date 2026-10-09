@@ -4,7 +4,6 @@ import { site } from './site';
 export type RecentRepo = {
   name: string;
   url: string;
-  language: string | null;
   pushedAt: string;
   lastCommit: { message: string; url: string } | null;
 };
@@ -27,11 +26,10 @@ query ($login: String!) {
         weeks { contributionDays { date contributionCount } }
       }
     }
-    repositories(first: 3, privacy: PUBLIC, ownerAffiliations: OWNER, orderBy: { field: PUSHED_AT, direction: DESC }) {
+    repositories(first: 5, privacy: PUBLIC, ownerAffiliations: OWNER, orderBy: { field: PUSHED_AT, direction: DESC }) {
       nodes {
         name url pushedAt
-        primaryLanguage { name }
-        defaultBranchRef { target { ... on Commit { message url } } }
+        defaultBranchRef { target { ... on Commit { history(first: 10) { nodes { message url parents { totalCount } } } } } }
       }
     }
   }
@@ -51,8 +49,9 @@ type Response = {
           name: string;
           url: string;
           pushedAt: string;
-          primaryLanguage: { name: string } | null;
-          defaultBranchRef: { target: { message?: string; url?: string } } | null;
+          defaultBranchRef: {
+            target: { history?: { nodes: { message: string; url: string; parents: { totalCount: number } }[] } };
+          } | null;
         }[];
       };
     } | null;
@@ -88,16 +87,20 @@ export async function getGithubActivity(): Promise<GithubActivity | null> {
       days,
       last30: days.reduce((n, d) => n + d.count, 0),
       pastYear: calendar.totalContributions,
-      repos: user.repositories.nodes.map((r) => {
-        const commit = r.defaultBranchRef?.target;
-        return {
-          name: r.name,
-          url: r.url,
-          language: r.primaryLanguage?.name ?? null,
-          pushedAt: r.pushedAt,
-          lastCommit: commit?.message && commit.url ? { message: commit.message.split('\n')[0], url: commit.url } : null,
-        };
-      }),
+      repos: user.repositories.nodes
+        // Skip the profile README repo (named after the account); it isn't a project.
+        .filter((r) => r.name.toLowerCase() !== site.githubUser.toLowerCase())
+        .slice(0, 2)
+        .map((r) => {
+          // Latest real commit: merge commits ("Merge pull request #1 from …") say nothing about the work.
+          const commit = r.defaultBranchRef?.target.history?.nodes.find((c) => c.parents.totalCount === 1);
+          return {
+            name: r.name,
+            url: r.url,
+            pushedAt: r.pushedAt,
+            lastCommit: commit ? { message: commit.message.split('\n')[0], url: commit.url } : null,
+          };
+        }),
     };
   } catch {
     return null;
