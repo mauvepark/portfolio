@@ -1,0 +1,89 @@
+.book { position: relative; padding-top: 34px; outline: none; }
+.book:focus-visible .spread { outline: 2px dashed var(--accent); outline-offset: 8px; }
+
+/* ---------- sticky-note tabs poking out of the top edge ---------- */
+.tabs {
+  position: absolute; top: -10px; left: 28px; right: 28px;
+  display: flex; gap: 6px; overflow-x: auto; overflow-y: hidden; scrollbar-width: none;
+  /* overflow-x also clips vertically, so leave headroom for tabs that lift on hover/active,
+     and a little room below (hidden under the page) for the tilted tabs' corners, so the
+     strip never has anything to scroll vertically. */
+  padding: 10px 0 6px;
+}
+.tab {
+  flex: 0 0 auto; min-height: 44px; padding: 6px 12px 14px;
+  font-family: var(--font-hand); font-size: 20px; line-height: 1; color: var(--ink);
+  background: var(--hatch-bg); border: 1.2px solid var(--graphite); border-bottom: 0;
+  border-radius: 6px 8px 0 0; cursor: pointer; transform: rotate(var(--tab-tilt));
+  transition: transform .15s ease, background .15s ease;
+}
+.tab:hover { transform: rotate(var(--tab-tilt)) translateY(-3px); }
+.tab[aria-current='page'] { background: var(--card); color: var(--accent); font-weight: 700; transform: rotate(0) translateY(-5px); }
+
+/* ---------- the open book ---------- */
+.spread {
+  position: relative; display: grid; grid-template-columns: 1fr 1fr; min-height: 480px;
+  perspective: 2200px; isolation: isolate;
+}
+
+.page {
+  position: relative; display: flex; flex-direction: column; gap: 14px; height: 100%;
+  box-sizing: border-box; padding: 34px 40px 52px; background: var(--card);
+  border: 1.6px solid var(--graphite);
+  box-shadow: 0 12px 20px -14px rgba(38, 38, 36, .35);
+}
+.left { border-radius: 10px 2px 2px 12px; border-right: 0; padding-right: 56px;
+  background-image: linear-gradient(to left, rgba(38, 38, 36, .10), transparent 46px); }
+.right { border-radius: 2px 12px 10px 2px; border-left: 0; padding-left: 56px; justify-content: center;
+  background-image: linear-gradient(to right, rgba(38, 38, 36, .10), transparent 46px),
+    repeating-linear-gradient(transparent 0 33px, rgba(46, 46, 43, .08) 33px 34px); }
+
+.cover { margin-bottom: 4px; }
+.title { margin: 0; font-family: var(--font-hand); font-size: clamp(44px, 5vw, 60px); font-weight: 700; line-height: .95; }
+.blurb { margin: 0; font-size: 20px; line-height: 1.6; }
+.stack { margin: 0; font-family: var(--font-mono); font-size: 14px; color: var(--graphite-soft); }
+.folio { position: absolute; bottom: 18px; font-family: var(--font-mono); font-size: 12px; color: var(--muted); }
+.left .folio { left: 40px; }
+.right .folio { right: 40px; }
+
+/* ---------- the turning leaf ---------- */
+.leaf {
+  position: absolute; z-index: 2; top: 0; bottom: 0; width: 50%;
+  transform-style: preserve-3d; will-change: transform; animation-timing-function: cubic-bezier(.45, .05, .3, 1); animation-fill-mode: forwards;
+}
+.leafNext { left: 50%; transform-origin: left center; animation-name: turnNext; }
+.leafPrev { left: 0; transform-origin: right center; animation-name: turnPrev; }
+@keyframes turnNext { from { transform: rotateY(0); } to { transform: rotateY(-180deg); } }
+@keyframes turnPrev { from { transform: rotateY(0); } to { transform: rotateY(180deg); } }
+
+.face { position: absolute; inset: 0; backface-visibility: hidden; -webkit-backface-visibility: hidden; }
+.back { transform: rotateY(180deg); }
+.ghostBtn { border: 1.6px solid var(--graphite); border-radius: 4px 9px 5px 8px; }
+/* A little shading sweeps across the leaf as it lifts. */
+.face::after {
+  content: ''; position: absolute; inset: 0; pointer-events: none;
+  background: linear-gradient(to right, rgba(38, 38, 36, .18), transparent 60%);
+  opacity: 0; animation: shade var(--turn-ms) ease-in-out;
+}
+@keyframes shade { 50% { opacity: 1; } }
+
+.controls { display: flex; justify-content: center; align-items: center; gap: 24px; margin-top: 24px; }
+
+@media (max-width: 1000px) {
+  .tabs { left: 12px; right: 12px; gap: 3px; }
+  .tab { font-size: 16px; padding: 6px 8px 14px; }
+  .page { padding: 28px 28px 48px; }
+  .left { padding-right: 40px; }
+  .right { padding-left: 40px; }
+  .blurb { font-size: 18px; }
+}
+
+/* ---------- book vs grid ---------- */
+.hidden { display: none; }
+.gridFallback { display: none; }
+/* Phones and narrow tablets: the spread is too cramped, so always show the card grid. */
+@media (max-width: 767px) {
+  .bookOnly { display: none; }
+  .gridFallback { display: block; }
+  .viewToggle { display: none !important; }
+}
