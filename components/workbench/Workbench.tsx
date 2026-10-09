@@ -25,6 +25,14 @@ export async function Workbench() {
         <p className="label">{gh ? 'Live from GitHub' : `Updated ${now.updated}`}</p>
       </div>
 
+      {/* A taped-down sheet of graph paper the notes sit on. */}
+      <div className={`sketch ${styles.blotter}`}>
+        <div className={`tape ${styles.tapeLeft}`} aria-hidden="true" />
+        <div className={`tape ${styles.tapeRight}`} aria-hidden="true" />
+        <svg className={styles.coffeeRing} viewBox="0 0 120 120" aria-hidden="true">
+          <circle cx="60" cy="60" r="46" />
+          <circle cx="60" cy="60" r="41" strokeDasharray="60 14 110 20" />
+        </svg>
       <ul className={styles.desk}>
         <li className={styles.note} style={{ '--tilt': '-1.6deg' } as React.CSSProperties}>
           <div className="tape" aria-hidden="true" />
@@ -72,6 +80,7 @@ export async function Workbench() {
           </li>
         )}
       </ul>
+      </div>
     </section>
   );
 }

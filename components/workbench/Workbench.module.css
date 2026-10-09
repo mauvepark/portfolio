@@ -1,6 +1,31 @@
+/* ---------- the desk blotter: light graph paper, taped down ---------- */
+.blotter {
+  --grid: rgba(46, 46, 43, .06);
+  --grid-major: rgba(46, 46, 43, .11);
+  padding: 44px 40px 48px;
+  background-color: #F7F5F0;
+  background-image:
+    linear-gradient(var(--grid-major) 1px, transparent 1px),
+    linear-gradient(90deg, var(--grid-major) 1px, transparent 1px),
+    linear-gradient(var(--grid) 1px, transparent 1px),
+    linear-gradient(90deg, var(--grid) 1px, transparent 1px);
+  background-size: 120px 120px, 120px 120px, 24px 24px, 24px 24px;
+  background-position: -1px -1px;
+}
+.blotter > .tapeLeft, .blotter > .tapeRight { top: -12px; width: 84px; height: 24px; margin-left: 0; }
+.blotter > .tapeLeft { left: 36px; transform: rotate(-5deg); }
+.blotter > .tapeRight { left: auto; right: 36px; transform: rotate(4deg); }
+
+/* A faint coffee-cup ring in the corner, drawn in pencil. */
+.coffeeRing {
+  position: absolute; right: 28px; bottom: 18px; width: 110px; height: 110px;
+  fill: none; stroke: var(--graphite); stroke-width: 3; opacity: .1;
+  filter: url(#pencil); pointer-events: none;
+}
+
 .desk {
-  list-style: none; margin: 0; padding: 14px 0 0;
-  display: grid; grid-template-columns: repeat(auto-fill, minmax(300px, 1fr)); gap: 40px 32px; align-items: start;
+  position: relative; list-style: none; margin: 0; padding: 0;
+  display: grid; grid-template-columns: repeat(auto-fill, minmax(min(300px, 100%), 1fr)); gap: 40px 32px; align-items: start;
 }
 
 .note {
@@ -35,6 +60,11 @@
 .repoHead a { font-weight: 700; font-size: 17px; overflow-wrap: anywhere; }
 .repoHead span { font-family: var(--font-mono); font-size: 12px; color: var(--muted); flex: none; }
 .commit { display: block; font-size: 15px; line-height: 1.4; color: var(--graphite-soft); overflow-wrap: anywhere; }
+
+@media (max-width: 640px) {
+  .blotter { padding: 36px 18px 40px; }
+  .coffeeRing { width: 80px; height: 80px; right: 12px; bottom: 10px; }
+}
 
 @media (prefers-reduced-motion: reduce) {
   .sparkLine { stroke-dashoffset: 0; animation: none !important; }
