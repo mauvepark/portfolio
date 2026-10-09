@@ -115,8 +115,8 @@ export default async function Home() {
           </div>
         </div>
         <footer className="label" style={{ display: 'flex', flexWrap: 'wrap', justifyContent: 'space-between', gap: 8, padding: '36px 0 8px', fontSize: 13, letterSpacing: 0, textTransform: 'none' }}>
-          <span>Drawn &amp; built by Noor Ali</span>
-          <span>Calgary, AB · 2026</span>
+          <span>Sketched by Noor Ali</span>
+          <span>Canada · 2026</span>
         </footer>
       </section>
     </div>
