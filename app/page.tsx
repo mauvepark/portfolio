@@ -5,6 +5,7 @@ import { getNotes, getProjectSummaries } from '@/lib/content';
 import { ProjectsSection } from '@/components/projects/ProjectsSection';
 import { site } from '@/lib/site';
 import { Guestbook } from '@/components/guestbook/Guestbook';
+import { Workbench } from '@/components/workbench/Workbench';
 import { PAGE_SIZE, PUBLIC_COLUMNS, type Entry } from '@/lib/guestbook';
 import { supabasePublic } from '@/lib/supabase';
 
@@ -67,6 +68,8 @@ export default async function Home() {
           <p className="aside" style={{ marginTop: 4 }}>→ open to PM &amp; SWE internships, 2027</p>
         </div>
       </section>
+
+      <Workbench />
 
       <ProjectsSection projects={getProjectSummaries()} />
 

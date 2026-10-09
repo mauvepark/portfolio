@@ -2,9 +2,11 @@
 export const site = {
   name: 'Noor Ali',
   email: '[YOUR@EMAIL.COM]',
+  /** GitHub login the workbench reads public activity for. */
+  githubUser: 'mauvepark',
   links: {
     resume: '#',
     linkedin: '#',
-    github: '#',
+    github: 'https://github.com/mauvepark',
   },
 };

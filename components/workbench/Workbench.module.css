@@ -1,0 +1,65 @@
+/* ---------- corkboard: speckled, framed, drawn in graphite ---------- */
+.board {
+  padding: 48px 40px 44px;
+  background-color: #E8E3D9;
+  /* Layered speckles at co-prime sizes read as cork grain without an image. */
+  background-image:
+    radial-gradient(rgba(46, 46, 43, .13) 0.8px, transparent 1.3px),
+    radial-gradient(rgba(46, 46, 43, .09) 1px, transparent 1.6px),
+    radial-gradient(rgba(255, 255, 255, .55) 0.9px, transparent 1.4px),
+    radial-gradient(rgba(46, 46, 43, .07) 1.4px, transparent 2.2px);
+  background-size: 7px 9px, 11px 13px, 9px 7px, 17px 19px;
+  background-position: 0 0, 3px 5px, 5px 2px, 8px 11px;
+  /* Inner frame edge and a soft recess, so the board sits inside its frame. */
+  box-shadow: inset 0 0 0 7px var(--card), inset 0 0 0 8.2px rgba(46, 46, 43, .45), inset 0 3px 10px 8px rgba(38, 38, 36, .12);
+}
+
+/* Push pin: sits at the top centre of each note, head pressed into the cork. */
+.pin { position: absolute; top: -12px; left: 50%; width: 28px; height: 28px; margin-left: -14px; z-index: 1; pointer-events: none; }
+
+.desk {
+  position: relative; list-style: none; margin: 0; padding: 0;
+  display: grid; grid-template-columns: repeat(auto-fill, minmax(min(300px, 100%), 1fr)); gap: 40px 32px; align-items: start;
+}
+
+.note {
+  position: relative; background: var(--card); padding: 28px 24px 20px;
+  display: flex; flex-direction: column; gap: 6px;
+  box-shadow: 0 1px 0 rgba(0, 0, 0, .05), 0 8px 18px -12px rgba(0, 0, 0, .3);
+  transform: rotate(var(--tilt));
+}
+.note p { margin: 0; }
+
+.big { font-family: var(--font-hand); font-size: 30px; line-height: 1.1; }
+.body { font-size: 16px; line-height: 1.5; }
+
+.stat { font-family: var(--font-hand); font-size: 64px; font-weight: 700; line-height: 1; display: flex; align-items: baseline; gap: 12px; }
+.statNote { font-family: var(--font-mono); font-size: 13px; font-weight: 400; color: var(--muted); }
+
+.note .caption { margin-top: 4px; font-family: var(--font-mono); font-size: 12px; color: var(--muted); text-align: right; }
+.spark { display: block; width: 100%; height: auto; margin-top: 8px; overflow: visible; }
+.baseline { fill: none; stroke: rgba(46, 46, 43, .25); stroke-width: 1; stroke-dasharray: 3 4; }
+.sparkLine {
+  fill: none; stroke: var(--graphite); stroke-width: 2; stroke-linecap: round; stroke-linejoin: round;
+  filter: url(#pencil2); stroke-dasharray: 1; stroke-dashoffset: 1;
+}
+.sparkLine[data-drawn='true'] { animation: sketch 1.4s cubic-bezier(.6, .1, .3, 1) forwards; }
+.peak { fill: none; stroke: var(--accent); stroke-width: 2; opacity: 0; }
+.peak[data-drawn='true'] { animation: appear .3s ease 1.3s forwards; }
+@keyframes sketch { to { stroke-dashoffset: 0; } }
+@keyframes appear { to { opacity: 1; } }
+
+.repos { list-style: none; margin: 6px 0 4px; padding: 0; display: flex; flex-direction: column; gap: 14px; }
+.repoHead { display: flex; justify-content: space-between; align-items: baseline; gap: 10px; }
+.repoHead a { font-weight: 700; font-size: 17px; overflow-wrap: anywhere; }
+.repoHead span { font-family: var(--font-mono); font-size: 12px; color: var(--muted); flex: none; }
+.commit { display: block; font-size: 15px; line-height: 1.4; color: var(--graphite-soft); overflow-wrap: anywhere; }
+
+@media (max-width: 640px) {
+  .board { padding: 40px 20px 36px; }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .sparkLine { stroke-dashoffset: 0; animation: none !important; }
+  .peak { opacity: 1; animation: none !important; }
+}
