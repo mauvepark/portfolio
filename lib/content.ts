@@ -43,6 +43,16 @@ export function projectHref(p: Project) {
   return p.href ?? `/projects/${p.slug}`;
 }
 
+/** What the client-side project views need: no MDX body, link already resolved. */
+export type ProjectSummary = Omit<Project, 'body' | 'href' | 'order'> & { link: string };
+
+export function getProjectSummaries(): ProjectSummary[] {
+  return getProjects().map((project) => {
+    const { body: _body, href: _href, order: _order, ...p } = project;
+    return { ...p, link: projectHref(project) };
+  });
+}
+
 export function getNotes(): Note[] {
   return readDir<Note>('notes').sort((a, b) => b.date.localeCompare(a.date));
 }
