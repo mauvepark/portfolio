@@ -4,12 +4,14 @@
 /* ---------- sticky-note tabs poking out of the top edge ---------- */
 .tabs {
   position: absolute; top: -10px; left: 28px; right: 28px;
-  display: flex; gap: 6px; overflow-x: auto; scrollbar-width: none;
-  /* overflow-x also clips vertically, so leave headroom for tabs that lift on hover/active. */
-  padding-top: 10px;
+  display: flex; gap: 6px; overflow-x: auto; overflow-y: hidden; scrollbar-width: none;
+  /* overflow-x also clips vertically, so leave headroom for tabs that lift on hover/active,
+     and a little room below (hidden under the page) for the tilted tabs' corners, so the
+     strip never has anything to scroll vertically. */
+  padding: 10px 0 6px;
 }
 .tab {
-  flex: 0 0 auto; min-height: 44px; padding: 6px 12px 14px; margin-bottom: -10px;
+  flex: 0 0 auto; min-height: 44px; padding: 6px 12px 14px;
   font-family: var(--font-hand); font-size: 20px; line-height: 1; color: var(--ink);
   background: var(--hatch-bg); border: 1.2px solid var(--graphite); border-bottom: 0;
   border-radius: 6px 8px 0 0; cursor: pointer; transform: rotate(var(--tab-tilt));
