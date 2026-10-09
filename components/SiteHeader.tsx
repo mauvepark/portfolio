@@ -1,20 +1,59 @@
+'use client';
+
 import Link from 'next/link';
+import { usePathname } from 'next/navigation';
+import { useEffect, useRef, useState } from 'react';
 import { PencilRule } from './sketch/PencilFilters';
+import styles from './SiteHeader.module.css';
+
+const links = [
+  ['about', 'About'],
+  ['projects', 'Projects'],
+  ['skills', 'Skills'],
+  ['notes', 'Notes'],
+  ['guestbook', 'Guestbook'],
+  ['contact', 'Contact'],
+] as const;
 
 export function SiteHeader() {
+  const pathname = usePathname();
+  const ref = useRef<HTMLDivElement>(null);
+  const [scrolled, setScrolled] = useState(false);
+
+  // Publish the header's height so anchor jumps land below it (html { scroll-padding-top }).
+  useEffect(() => {
+    const el = ref.current;
+    if (!el) return;
+    const ro = new ResizeObserver(() => document.documentElement.style.setProperty('--header-h', `${el.offsetHeight}px`));
+    ro.observe(el);
+    const onScroll = () => setScrolled(window.scrollY > 8);
+    onScroll();
+    window.addEventListener('scroll', onScroll, { passive: true });
+    return () => {
+      ro.disconnect();
+      window.removeEventListener('scroll', onScroll);
+    };
+  }, []);
+
+  function toTop(e: React.MouseEvent) {
+    if (pathname !== '/') return; // elsewhere, the link just goes home
+    e.preventDefault();
+    const smooth = !window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+    window.scrollTo({ top: 0, behavior: smooth ? 'smooth' : 'auto' });
+    history.replaceState(null, '', '/');
+  }
+
   return (
-    <>
-      <header style={{ display: 'flex', flexWrap: 'wrap', justifyContent: 'space-between', alignItems: 'center', gap: 12, padding: '28px 0 16px' }}>
-        <Link href="/#about" className="hand" style={{ fontSize: 40, fontWeight: 700, lineHeight: 1 }}>Noor Ali</Link>
-        <nav aria-label="Main" style={{ display: 'flex', flexWrap: 'wrap', gap: '4px 22px' }}>
-          <Link className="navlink" href="/#projects">[Projects]</Link>
-          <Link className="navlink" href="/#skills">[Skills]</Link>
-          <Link className="navlink" href="/#notes">[Notes]</Link>
-          <Link className="navlink" href="/#guestbook">[Guestbook]</Link>
-          <Link className="navlink" href="/#contact">[Contact]</Link>
+    <div ref={ref} className={styles.bar} data-scrolled={scrolled}>
+      <header className={styles.header}>
+        <Link href="/" className={`hand ${styles.name}`} onClick={toTop}>Noor Ali</Link>
+        <nav aria-label="Main" className={styles.nav}>
+          {links.map(([id, label]) => (
+            <Link key={id} className="navlink" href={`/#${id}`}>[{label}]</Link>
+          ))}
         </nav>
       </header>
       <PencilRule />
-    </>
+    </div>
   );
 }

@@ -13,7 +13,7 @@
   --font-mono: var(--font-plex-mono), 'IBM Plex Mono', monospace;
 }
 
-html { scroll-behavior: smooth; }
+html { scroll-behavior: smooth; scroll-padding-top: calc(var(--header-h, 90px) + 12px); }
 body { margin: 0; background: var(--paper); color: var(--ink); font-family: var(--font-body); }
 a { color: var(--ink); text-decoration: none; }
 a:hover { color: #000; text-decoration: underline; text-decoration-thickness: 1.5px; text-underline-offset: 4px; }
@@ -22,7 +22,9 @@ a:hover { color: #000; text-decoration: underline; text-decoration-thickness: 1.
 /* ---------- ground ---------- */
 .paper {
   min-height: 100vh;
-  overflow-x: hidden;
+  /* clip (not hidden): hides sideways overflow without becoming a scroll container,
+     which would stop the sticky header from sticking. */
+  overflow-x: clip;
   background-color: var(--paper);
   background-image: radial-gradient(rgba(38, 38, 36, .07) 1px, transparent 1.2px);
   background-size: 22px 22px;
