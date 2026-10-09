@@ -1,4 +1,3 @@
-import Link from 'next/link';
 import { SiteHeader } from '@/components/SiteHeader';
 import { Hatch } from '@/components/sketch/PencilFilters';
 import { getNotes, getProjectSummaries } from '@/lib/content';
@@ -6,6 +5,8 @@ import { ProjectsSection } from '@/components/projects/ProjectsSection';
 import { site } from '@/lib/site';
 import { Guestbook } from '@/components/guestbook/Guestbook';
 import { Workbench } from '@/components/workbench/Workbench';
+import { NotesSection } from '@/components/notes/NotesSection';
+import { Prose } from '@/components/Prose';
 import { PAGE_SIZE, PUBLIC_COLUMNS, type Entry } from '@/lib/guestbook';
 import { supabasePublic } from '@/lib/supabase';
 
@@ -90,22 +91,10 @@ export default async function Home() {
         </div>
       </section>
 
-      {/* NOTES */}
-      <section id="notes" className="section">
-        <div className="section-head" style={{ marginBottom: 28 }}>
-          <h2 className="section-title">notes</h2>
-          <Link className="navlink" href="/notes">[View all]</Link>
-        </div>
-        <div style={{ display: 'flex', flexDirection: 'column' }}>
-          {notes.slice(0, 3).map((n) => (
-            <Link key={n.slug} className="row" href={`/notes/${n.slug}`}>
-              <span className="row-date">{n.date}</span>
-              <span className="row-title">{n.title}</span>
-              <span className="navlink" style={{ minHeight: 0 }}>[Read]</span>
-            </Link>
-          ))}
-        </div>
-      </section>
+      <NotesSection
+        notes={notes.map(({ slug, title, date }) => ({ slug, title, date }))}
+        bodies={Object.fromEntries(notes.map((n) => [n.slug, <Prose key={n.slug} source={n.body} />]))}
+      />
 
       <Guestbook initial={wall} />
 
