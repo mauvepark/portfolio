@@ -3,8 +3,10 @@
 
 /* ---------- sticky-note tabs poking out of the top edge ---------- */
 .tabs {
-  position: absolute; top: 0; left: 28px; right: 28px;
+  position: absolute; top: -10px; left: 28px; right: 28px;
   display: flex; gap: 6px; overflow-x: auto; scrollbar-width: none;
+  /* overflow-x also clips vertically, so leave headroom for tabs that lift on hover/active. */
+  padding-top: 10px;
 }
 .tab {
   flex: 0 0 auto; min-height: 44px; padding: 6px 12px 14px; margin-bottom: -10px;
