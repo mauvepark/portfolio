@@ -1,0 +1,42 @@
+.desk {
+  list-style: none; margin: 0; padding: 14px 0 0;
+  display: grid; grid-template-columns: repeat(auto-fill, minmax(300px, 1fr)); gap: 40px 32px; align-items: start;
+}
+
+.note {
+  position: relative; background: var(--card); padding: 26px 24px 20px;
+  display: flex; flex-direction: column; gap: 6px;
+  box-shadow: 0 1px 0 rgba(0, 0, 0, .05), 0 8px 18px -12px rgba(0, 0, 0, .3);
+  transform: rotate(var(--tilt));
+}
+.note p { margin: 0; }
+
+.big { font-family: var(--font-hand); font-size: 30px; line-height: 1.1; }
+.body { font-size: 16px; line-height: 1.5; }
+
+.stat { font-family: var(--font-hand); font-size: 64px; font-weight: 700; line-height: 1; display: flex; align-items: baseline; gap: 12px; }
+.statNote { font-family: var(--font-mono); font-size: 13px; font-weight: 400; color: var(--muted); }
+
+.spark { display: block; width: 100%; height: auto; margin-top: 8px; overflow: visible; }
+.baseline { fill: none; stroke: rgba(46, 46, 43, .25); stroke-width: 1; stroke-dasharray: 3 4; }
+.sparkLine {
+  fill: none; stroke: var(--graphite); stroke-width: 2; stroke-linecap: round; stroke-linejoin: round;
+  filter: url(#pencil2); stroke-dasharray: 1; stroke-dashoffset: 1;
+}
+.sparkLine[data-drawn='true'] { animation: sketch 1.4s cubic-bezier(.6, .1, .3, 1) forwards; }
+.peak { fill: none; stroke: var(--accent); stroke-width: 2; opacity: 0; }
+.peak[data-drawn='true'] { animation: appear .3s ease 1.3s forwards; }
+@keyframes sketch { to { stroke-dashoffset: 0; } }
+@keyframes appear { to { opacity: 1; } }
+
+.repos { list-style: none; margin: 6px 0 4px; padding: 0; display: flex; flex-direction: column; gap: 14px; }
+.repoHead { display: flex; justify-content: space-between; align-items: baseline; gap: 10px; }
+.repoHead a { font-weight: 700; font-size: 17px; overflow-wrap: anywhere; }
+.repoHead span { font-family: var(--font-mono); font-size: 12px; color: var(--muted); flex: none; }
+.commit { display: block; font-size: 15px; line-height: 1.4; color: var(--graphite-soft); overflow-wrap: anywhere; }
+.lang { font-family: var(--font-mono); font-size: 12px; color: var(--muted); }
+
+@media (prefers-reduced-motion: reduce) {
+  .sparkLine { stroke-dashoffset: 0; animation: none !important; }
+  .peak { opacity: 1; animation: none !important; }
+}
