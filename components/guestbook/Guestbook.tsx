@@ -26,6 +26,12 @@ export function Guestbook({ initial }: { initial: Entry[] }) {
     const channel = supabasePublic()
       .channel('guestbook-wall')
       .on('postgres_changes', { event: '*', schema: 'public', table: 'guestbook' }, (payload) => {
+        // Deleted in /admin: realtime only sends the old row's id.
+        if (payload.eventType === 'DELETE') {
+          const goneId = (payload.old as { id?: string }).id;
+          if (goneId) setEntries((prev) => prev.filter((e) => e.id !== goneId));
+          return;
+        }
         const row = payload.new as Partial<Entry> & { approved?: boolean };
         if (!row?.id) return;
         if (row.approved === false) {

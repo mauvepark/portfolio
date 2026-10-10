@@ -1,0 +1,26 @@
+.signIn { max-width: 440px; background: var(--card); padding: 26px; display: flex; flex-direction: column; gap: 16px; }
+.lead { margin: 0; font-size: 17px; line-height: 1.5; }
+.field { display: flex; flex-direction: column; gap: 6px; }
+.field input {
+  font: inherit; font-size: 17px; color: var(--ink); background: transparent; min-height: 44px;
+  border: 0; border-bottom: 1.5px solid var(--graphite); padding: 8px 2px; border-radius: 0;
+}
+.field input:focus { outline: none; border-bottom-color: var(--accent); }
+.status { margin: 0 0 16px; font-size: 16px; }
+.status[data-kind='error'] { color: var(--accent); }
+
+.toolbar { display: flex; flex-wrap: wrap; align-items: center; gap: 8px 20px; margin-bottom: 28px; }
+.tabs { display: flex; gap: 6px; margin-right: auto; }
+.tab {
+  min-height: 44px; padding: 0 14px; font-family: var(--font-mono); font-size: 14px; letter-spacing: .06em;
+  text-transform: uppercase; background: none; border: 0; cursor: pointer; color: var(--muted);
+}
+.tab[aria-selected='true'] { color: var(--ink); text-decoration: underline; text-decoration-thickness: 1.5px; text-underline-offset: 6px; }
+
+.grid { list-style: none; margin: 0; padding: 0; display: grid; grid-template-columns: repeat(auto-fill, minmax(min(260px, 100%), 1fr)); gap: 32px 24px; }
+.card { background: var(--card); padding: 16px; display: flex; flex-direction: column; gap: 6px; }
+.doodle { background: #fff; border: 1px solid rgba(46, 46, 43, .15); min-height: 60px; display: grid; place-items: center; }
+.name { margin: 6px 0 0; font-family: var(--font-hand); font-size: 26px; font-weight: 700; line-height: 1; }
+.message { margin: 0; font-size: 16px; line-height: 1.45; overflow-wrap: anywhere; }
+.actions { display: flex; flex-wrap: wrap; gap: 10px; margin-top: 8px; }
+.delete { color: var(--accent); }
