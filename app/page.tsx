@@ -31,7 +31,7 @@ const skills = [
   },
   {
     title: 'Tools & Technologies',
-    items: ['Supabase · PostgreSQL · REST APIs', 'Git/GitHub · CI/CD · Linux', 'Claude API · Claude Code · Cursor', 'Power BI · DAX · Power Query', 'Jira · Figma', 'PyTest · JUnit · TDD'],
+    items: ['Supabase · PostgreSQL · REST APIs', 'Git/GitHub · Docker · Linux', 'CI/CD · PyTest · JUnit · TDD', 'Claude API · Claude Code · Cursor', 'Power BI · DAX · Power Query', 'Jira · Figma'],
   },
   {
     title: 'Product Skills',
