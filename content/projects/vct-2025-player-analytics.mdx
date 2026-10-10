@@ -1,10 +1,91 @@
 ---
 title: VCT 2025 Player Analytics
-order: 5
-kind: Data · In progress
-blurb: A Power BI dashboard exploring VALORANT Champions Tour 2025 player stats.
-stack: Power BI · Kaggle data
+order: 2
+kind: Data Analytics · Complete
+blurb: "An interactive Power BI dashboard that analyzes pro VALORANT play across the 2025 VALORANT Champions Tour: which agents ran the meta, which players performed best, and how teams build their agent pools."
+stack: Power BI · DAX · Power Query · Python (pandas)
 cover: dashboard screenshot
-cta: View on GitHub
-href: "#"
+image: /projects/vct.png
+cta: Read case study
 ---
+
+**TL;DR:** An interactive Power BI dashboard that analyzes pro VALORANT play across the 2025 VALORANT Champions Tour: which agents ran the meta, which players performed best, and how teams build their agent pools. I built it to learn Power BI end to end. Most of the work turned out to be making messy data trustworthy before charting any of it.
+
+## Overview
+
+VCT 2025 Player Analytics is a three-page dashboard built on 9,800+ pro match records from 15 tournaments, from the four regional Kickoffs through Masters Bangkok, Masters Toronto and Champions 2025. Anyone can pick a tournament or a team and get answers for themselves, without needing an analyst to pull the numbers.
+
+- **Role:** Solo analyst: data cleaning, modeling, measures and report design
+- **Stack:** Power BI (web), DAX, Power Query, Python (pandas)
+- **Data:** [Valorant Champion Tour 2021–2026 Data](https://www.kaggle.com/datasets/ryanluong1/valorant-champion-tour-2021-2023-data) on Kaggle, 2025 player stats
+- **Code and README:** [GitHub: VALORANT-VCT2025-Player-Analytics](https://github.com/mauvepark/VALORANT-VCT2025-Player-Analytics)
+- **Status:** Complete
+
+## Why I built it
+
+More and more of the internships I want, especially in energy and enterprise tech, ask for Power BI and dashboard experience, and I had none. I wanted to close that gap with a real project rather than a tutorial, so I picked a subject I already know well. I play and follow VALORANT, which meant I could tell when a number looked wrong. That turned out to matter a lot.
+
+## The questions
+
+I framed the dashboard around three questions a coach, analyst or fan would actually ask:
+
+1. **Meta:** Which agents dominated pro play in 2025, and did that change by tournament or region?
+2. **Players:** Who performed best once you account for how much they played?
+3. **Teams:** How does a given team play, and how does it compare to the league?
+
+## Cleaning the data
+
+The raw file looked ready to use. It wasn't. Three problems would have produced confident, wrong numbers:
+
+| Problem | What it would have broken | Fix |
+|---|---|---|
+| Rollup rows mixed in with detail rows: "All Stages" totals and multi-agent rows like "astra, omen" | Every stat double- or triple-counted | Removed both, going from 17,996 rows to 9,805 at one consistent grain: one player, on one agent, in one match |
+| About 6,200 clutch records like 1/3 auto-converted to dates (03-Jan) by Excel | Clutch stats unusable for a third of the data | Decoded them back into wins and attempts, then validated against the dataset's own clutch %. All 2,654 checkable rows matched. |
+| Percentages stored as text ("44%") | Couldn't be aggregated or formatted | Converted to decimals |
+
+I did the cleaning in Python with pandas so every step is repeatable and documented in the repo, then loaded the clean file into Power BI.
+
+## Modeling and measures
+
+The most important decision in the model was to **never average averages.** The source gives per-match stats like ACS (average combat score). Averaging those across matches would treat a 13-round map the same as a 26-round one. Instead, every DAX measure rebuilds its rate from raw counts:
+
+- **ACS:** weighted by rounds played
+- **K/D, KPR:** from total kills, deaths and rounds
+- **Entry success:** first kills ÷ (first kills + first deaths)
+- **Agent pick %:** an agent's rounds ÷ all rounds in the current filter, so it adjusts to whatever tournament or team is selected
+- **League benchmarks:** the same measures with the team filter removed, so a team can be compared to the average
+
+I also added an agent role column (Duelist, Initiator, Controller, Sentinel) in Power Query so the meta could be viewed by role.
+
+## The dashboard
+
+| Page | What it answers |
+|---|---|
+| **Agent Meta** | Headline cards (players, agents played, top agent and its pick rate) and pick rate for every agent, colored by role and filterable by tournament |
+| **Player Leaderboard** | Top performers by round-weighted ACS (500+ rounds), plus a scatter chart with a trend line comparing ACS to entry success |
+| **Team Scouting** | Pick a team to see its stats next to the league average, its agent pool under a title that updates with the team, and each player's main agents |
+
+## What the data showed
+
+- **Omen was the backbone of the 2025 meta,** at about 13% of all player-rounds, ahead of Viper and Sova at about 8% each. He was the most-played agent in every region and at international events.
+- **The meta was remarkably uniform across regions.** All four leagues shared nearly the same top agents.
+- **Winning opening duels goes with impact.** Across 211 regular players, entry success and ACS are strongly correlated (r ≈ 0.61).
+- **But there's more than one way to be elite.** Among the top 25 players, that link almost disappears. ZmjjKK posted the highest ACS with below-average entry success, while aspas and Kai were the best opening-duel players.
+
+## Judgment calls
+
+A few decisions changed what the dashboard says more than any chart did:
+
+- **Minimum sample size.** Without a floor, players with one great map topped the leaderboard. I set 500 rounds as the cutoff. I tried 1,800 first, but that only left players from teams that went deep at international events, which ranked playtime more than skill.
+- **Choosing a chart that says something.** My first scatter chart used bubble sizes and was an unreadable blob. Narrowing it to the top 25 players removed the trend entirely. Showing all regular players with a trend line told the real story.
+- **Admitting gaps.** The source has no clutch data for China's leagues, so I left clutch % out of player comparisons rather than show misleading numbers. The README lists every limitation like this.
+
+## What I'd do next
+
+1. **Agent icons.** Replace agent names with their portraits by pulling icons from a community VALORANT API in Power Query. Just to make it more visually appealing :)
+2. **Map-level data.** Add which map each match was on, so teams can be scouted by map, not just overall.
+3. **Automated refresh.** Connect to a live source so the dashboard updates during a season, the way a real business dashboard would.
+
+## Reflection
+
+I went in expecting to simply learn a tool and came out understanding data analytics workflows a lot better. The Power BI skills came quickly. The harder lessons were the ones that apply to any data work: check the data before trusting it, define every number so it means what people assume it means, and design each page around a question someone actually has. The validation step is the part I'm proudest of! Catching thousands of corrupted values before they reached a chart is the difference between a dashboard that looks right and one that is right.

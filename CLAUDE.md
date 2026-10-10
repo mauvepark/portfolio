@@ -6,14 +6,15 @@ Personal portfolio site for Noor Ali, a third-year software engineering student 
 Next.js 15 (App Router, TypeScript) — Supabase + Vercel planned. `npm run dev` / `npm run build`.
 - Keep TypeScript on 5.x (Next 15 can't resolve `@/` path aliases with TS 7).
 - `app/` routes · `components/` (sketch primitives in `components/sketch/`) · `lib/content.ts` reads MDX · `lib/site.ts` holds email + links.
-- Projects and notes are MDX in `content/projects` and `content/notes` (frontmatter drives cards; a project with `href` links out instead of getting a case study page).
+- Projects and notes are MDX in `content/projects` and `content/notes` (frontmatter drives cards: `order`, `image`/`imageAlt`/`imageFit` for covers in `public/projects/`).
+- On the homepage, projects and notes open as cards (`components/sketch/SketchDialog.tsx`) with linkable hashes `#project-<slug>` / `#note-<slug>`; `/projects/[slug]` and `/notes/[slug]` pages still exist for direct links.
 - `design/` holds the original static mockup for visual reference — not served.
 - Roadmap: `~/.claude/plans/i-have-some-very-hashed-russell.md` (doodle guestbook → sketchbook page-turn → live workbench).
 
 ## Sections (anchor ids in index.html)
 - `#about` — intro, photo frame, resume/LinkedIn/GitHub buttons
 - `#projects` — six project cards (JAppL, Ramble, LockedIn, Solar Car Telemetry, VCT 2025 Player Analytics, Anything but JUNK)
-- `#skills` — Product / Engineering / Design columns + "off the clock"
+- `#skills` — Languages & Frameworks / Tools & Technologies / Product Skills (sourced from public/resume.pdf)
 - `#notes` — blog list
 - `#contact` — "let's talk" box and footer
 

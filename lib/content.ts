@@ -12,13 +12,19 @@ export type Project = {
   blurb: string;
   stack: string;
   cover: string;
+  /** Cover image in public/ (1600x800); falls back to a hatched placeholder labelled `cover`. */
+  image?: string;
+  /** contain (default): whole drawing fits, spare space blends into the paper. cover: crop to fill (photos, screenshots). */
+  imageFit?: 'contain' | 'cover';
+  /** Alt text for the cover; defaults to "<title> cover". */
+  imageAlt?: string;
   cta: string;
   /** External link; when absent the card links to /projects/[slug]. */
   href?: string;
   body: string;
 };
 
-export type Note = { slug: string; title: string; date: string; body: string };
+export type Note = { slug: string; title: string; date: string; category?: string; tldr?: string; body: string };
 
 function readDir<T>(dir: string): T[] {
   const full = path.join(root, dir);
@@ -39,18 +45,11 @@ export function getProject(slug: string) {
   return getProjects().find((p) => p.slug === slug);
 }
 
-export function projectHref(p: Project) {
-  return p.href ?? `/projects/${p.slug}`;
-}
-
-/** What the client-side project views need: no MDX body, link already resolved. */
-export type ProjectSummary = Omit<Project, 'body' | 'href' | 'order'> & { link: string };
+/** What the client-side project views need: everything but the MDX body. */
+export type ProjectSummary = Omit<Project, 'body' | 'href' | 'order'>;
 
 export function getProjectSummaries(): ProjectSummary[] {
-  return getProjects().map((project) => {
-    const { body: _body, href: _href, order: _order, ...p } = project;
-    return { ...p, link: projectHref(project) };
-  });
+  return getProjects().map(({ body: _body, href: _href, order: _order, ...p }) => p);
 }
 
 export function getNotes(): Note[] {

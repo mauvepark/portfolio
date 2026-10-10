@@ -1,0 +1,4 @@
+.cover { position: relative; overflow: hidden; }
+
+/* multiply: the drawing's white background takes on the paper colour behind it. */
+.cover img { mix-blend-mode: multiply; }

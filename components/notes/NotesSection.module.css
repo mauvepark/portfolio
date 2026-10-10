@@ -8,30 +8,10 @@
   border: 0; border-top: 1.5px solid var(--graphite); border-radius: 0;
 }
 
-/* ---------- the note card ---------- */
-.dialog {
-  width: min(760px, calc(100vw - 32px)); max-height: calc(100dvh - 48px);
-  padding: 22px 6px; border: 0; background: transparent; overflow: visible;
-}
-.dialog::backdrop { background: rgba(38, 38, 36, .38); backdrop-filter: blur(2px); }
-.dialog[open] { animation: pop .28s cubic-bezier(.2, .9, .3, 1.2); }
-.dialog[open]::backdrop { animation: fade .2s ease; }
-@keyframes pop { from { opacity: 0; transform: translateY(16px) rotate(-1deg) scale(.97); } }
-@keyframes fade { from { opacity: 0; } }
+/* Title with its one-line TL;DR underneath. */
+.rowTitle { display: flex; flex-direction: column; gap: 4px; }
+.rowTldr { font-size: 16px; font-weight: 400; line-height: 1.45; color: var(--graphite-soft); }
 
-.card {
-  background: var(--card); padding: 22px 40px 0;
-  box-shadow: 0 18px 40px -20px rgba(38, 38, 36, .45);
-}
-/* Only the body scrolls, so the pencil outline, tape and Close stay put on long notes. */
-.scroll { max-height: calc(100dvh - 170px); overflow-y: auto; overscroll-behavior: contain; padding-bottom: 40px; }
-.cardHead { display: flex; justify-content: space-between; align-items: center; gap: 12px; }
-.cardHead form { margin: 0; }
+/* ---------- inside the note card (see SketchDialog) ---------- */
+.tldr { margin: 4px 0 8px; font-size: 18px; line-height: 1.55; color: var(--graphite-soft); max-width: 680px; }
 .title { margin: 6px 0 4px; font-family: var(--font-hand); font-size: clamp(38px, 6vw, 56px); font-weight: 700; line-height: 1; }
-
-@media (max-width: 640px) {
-  .card { padding: 18px 20px 0; }
-}
-@media (prefers-reduced-motion: reduce) {
-  .dialog[open], .dialog[open]::backdrop { animation: none; }
-}

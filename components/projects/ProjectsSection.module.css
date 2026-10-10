@@ -1,0 +1,4 @@
+/* ---------- inside the project card (see SketchDialog) ---------- */
+.title { margin: 6px 0 10px; font-family: var(--font-hand); font-size: clamp(44px, 7vw, 72px); font-weight: 700; line-height: .95; }
+.stack { margin: 0; font-family: var(--font-mono); font-size: 13px; color: var(--graphite-soft); }
+.cover { margin: 24px 0 8px; }

@@ -9,23 +9,12 @@ export type RecentRepo = {
 };
 
 export type GithubActivity = {
-  /** Contributions per day for the last 30 days, oldest first. */
-  days: { date: string; count: number }[];
-  last30: number;
-  /** Rolling 12 months (GitHub's default calendar range). */
-  pastYear: number;
   repos: RecentRepo[];
 };
 
 const QUERY = `
 query ($login: String!) {
   user(login: $login) {
-    contributionsCollection {
-      contributionCalendar {
-        totalContributions
-        weeks { contributionDays { date contributionCount } }
-      }
-    }
     repositories(first: 5, privacy: PUBLIC, ownerAffiliations: OWNER, orderBy: { field: PUSHED_AT, direction: DESC }) {
       nodes {
         name url pushedAt
@@ -38,12 +27,6 @@ query ($login: String!) {
 type Response = {
   data?: {
     user: {
-      contributionsCollection: {
-        contributionCalendar: {
-          totalContributions: number;
-          weeks: { contributionDays: { date: string; contributionCount: number }[] }[];
-        };
-      };
       repositories: {
         nodes: {
           name: string;
@@ -58,7 +41,7 @@ type Response = {
   };
 };
 
-/** Public GitHub activity for the workbench. Cached for 5 minutes; null if unavailable. */
+/** Most recently pushed public repos for the workbench. Cached for 5 minutes; null if unavailable. */
 export async function getGithubActivity(): Promise<GithubActivity | null> {
   const token = process.env.GITHUB_TOKEN;
   if (!token) return null;
@@ -75,18 +58,7 @@ export async function getGithubActivity(): Promise<GithubActivity | null> {
     const user = ((await res.json()) as Response).data?.user;
     if (!user) return null;
 
-    const calendar = user.contributionsCollection.contributionCalendar;
-    const today = new Date().toISOString().slice(0, 10);
-    const days = calendar.weeks
-      .flatMap((w) => w.contributionDays)
-      .filter((d) => d.date <= today)
-      .slice(-30)
-      .map((d) => ({ date: d.date, count: d.contributionCount }));
-
     return {
-      days,
-      last30: days.reduce((n, d) => n + d.count, 0),
-      pastYear: calendar.totalContributions,
       repos: user.repositories.nodes
         // Skip the profile README repo (named after the account); it isn't a project.
         .filter((r) => r.name.toLowerCase() !== site.githubUser.toLowerCase())
