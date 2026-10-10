@@ -1,7 +1,7 @@
 import { ImageResponse } from 'next/og';
 import { accent, Footer, muted, OG_SIZE, ogFonts, paperStyle, publicImage } from '@/lib/og';
 
-export const alt = 'Noor Ali — hi, I’m Noor. I build things and sketch the why.';
+export const alt = 'Noor Ali — hi, i’m noor. always curious, always learning.';
 export const size = OG_SIZE;
 export const contentType = 'image/png';
 
@@ -32,9 +32,9 @@ export default async function Image() {
           </div>
           {/* Three fixed lines, like the site's intro. */}
           <div style={{ display: 'flex', flexDirection: 'column', fontFamily: 'Caveat', fontSize: 90, lineHeight: 0.98, whiteSpace: 'nowrap' }}>
-            <span>hi, I’m Noor.</span>
-            <span style={{ color: accent }}>I build things</span>
-            <span>and sketch the why.</span>
+            <span>hi, i’m noor.</span>
+            <span style={{ color: accent }}>always curious,</span>
+            <span>always learning.</span>
           </div>
           {/* pencil rule */}
           <div style={{ display: 'flex', height: 3, width: 420, background: '#2E2E2B', borderRadius: 2, margin: '34px 0 22px', opacity: 0.8 }} />

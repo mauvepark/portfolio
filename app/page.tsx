@@ -108,11 +108,11 @@ export default async function Home() {
         <div className={styles.text}>
           <p className="label">Software engineering · Product · Design</p>
           <h1 className={`hand ${styles.headline}`}>
-            <span className={styles.line}>hi, I&apos;m Noor.</span>
+            <span className={styles.line}>hi, i&apos;m noor.</span>
             <span className={styles.line} style={{ color: "var(--accent)" }}>
-              I build things
+              always curious,
             </span>
-            <span className={styles.line}>and sketch the why.</span>
+            <span className={styles.line}>always learning.</span>
           </h1>
           <p className={`lede ${styles.lede}`}>
             I&apos;m a software engineering student with a background in
