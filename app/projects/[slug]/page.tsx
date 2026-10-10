@@ -2,7 +2,7 @@ import Link from 'next/link';
 import { notFound } from 'next/navigation';
 import { SiteHeader } from '@/components/SiteHeader';
 import { Prose } from '@/components/Prose';
-import { Hatch } from '@/components/sketch/PencilFilters';
+import { Cover } from '@/components/projects/Cover';
 import { getProject, getProjects } from '@/lib/content';
 
 export function generateStaticParams() {
@@ -28,7 +28,7 @@ export default async function ProjectPage({ params }: { params: Promise<{ slug: 
         <p className="lede">{p.blurb}</p>
         <p className="card-stack" style={{ margin: '16px 0 40px' }}>{p.stack}</p>
         <div className="sketch" style={{ background: 'var(--card)', padding: 16, maxWidth: 880 }}>
-          <Hatch label={p.cover} height={360} />
+          <Cover p={p} height={360} sizes="(max-width: 960px) 100vw, 880px" priority />
         </div>
         <Prose source={p.body} />
       </article>

@@ -12,6 +12,8 @@ export type Project = {
   blurb: string;
   stack: string;
   cover: string;
+  /** Cover image in public/ (1600x800); falls back to a hatched placeholder labelled `cover`. */
+  image?: string;
   cta: string;
   /** External link; when absent the card links to /projects/[slug]. */
   href?: string;

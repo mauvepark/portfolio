@@ -2,7 +2,7 @@
 
 import Link from 'next/link';
 import { useCallback, useEffect, useRef, useState } from 'react';
-import { Hatch } from '@/components/sketch/PencilFilters';
+import { Cover } from './Cover';
 import { DrawnUnderline } from '@/components/sketch/DrawnUnderline';
 import type { ProjectSummary } from '@/lib/content';
 import styles from './Sketchbook.module.css';
@@ -16,7 +16,7 @@ function LeftPage({ p, i, live }: { p: ProjectSummary; i: number; live?: boolean
   return (
     <div className={`${styles.page} ${styles.left}`}>
       <div className={styles.cover}>
-        <Hatch label={p.cover} height={220} />
+        <Cover p={p} height={220} sizes="(max-width: 1120px) 45vw, 480px" />
       </div>
       <p className="label label-sm">{p.kind}</p>
       <h3 className={styles.title}>{p.title}</h3>
@@ -50,7 +50,7 @@ function RightPage({ p, i, live }: { p: ProjectSummary; i: number; live?: boolea
 function SinglePage({ p, i, live }: { p: ProjectSummary; i: number; live?: boolean }) {
   return (
     <div className={`${styles.page} ${styles.singlePage}`}>
-      <Hatch label={p.cover} height={160} />
+      <Cover p={p} height={160} sizes="100vw" />
       <p className="label label-sm">{p.kind}</p>
       <h3 className={styles.title}>{p.title}</h3>
       {live && <DrawnUnderline key={p.slug} width="min(220px, 70%)" delay={TURN_MS * 0.4} />}
