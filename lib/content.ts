@@ -45,18 +45,11 @@ export function getProject(slug: string) {
   return getProjects().find((p) => p.slug === slug);
 }
 
-export function projectHref(p: Project) {
-  return p.href ?? `/projects/${p.slug}`;
-}
-
-/** What the client-side project views need: no MDX body, link already resolved. */
-export type ProjectSummary = Omit<Project, 'body' | 'href' | 'order'> & { link: string };
+/** What the client-side project views need: everything but the MDX body. */
+export type ProjectSummary = Omit<Project, 'body' | 'href' | 'order'>;
 
 export function getProjectSummaries(): ProjectSummary[] {
-  return getProjects().map((project) => {
-    const { body: _body, href: _href, order: _order, ...p } = project;
-    return { ...p, link: projectHref(project) };
-  });
+  return getProjects().map(({ body: _body, href: _href, order: _order, ...p }) => p);
 }
 
 export function getNotes(): Note[] {

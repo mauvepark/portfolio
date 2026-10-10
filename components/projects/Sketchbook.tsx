@@ -1,6 +1,5 @@
 'use client';
 
-import Link from 'next/link';
 import { useCallback, useEffect, useRef, useState } from 'react';
 import { Cover } from './Cover';
 import { DrawnUnderline } from '@/components/sketch/DrawnUnderline';
@@ -27,7 +26,7 @@ function LeftPage({ p, i, live }: { p: ProjectSummary; i: number; live?: boolean
   );
 }
 
-function RightPage({ p, i, live }: { p: ProjectSummary; i: number; live?: boolean }) {
+function RightPage({ p, i, live, onOpen }: { p: ProjectSummary; i: number; live?: boolean; onOpen?: (slug: string) => void }) {
   return (
     <div className={`${styles.page} ${styles.right}`}>
       <p className={styles.blurb}>{p.blurb}</p>
@@ -36,7 +35,7 @@ function RightPage({ p, i, live }: { p: ProjectSummary; i: number; live?: boolea
         <p className={styles.stack}>{p.stack}</p>
       </div>
       {live ? (
-        <Link className="btn sketch" href={p.link} style={{ alignSelf: 'flex-start' }}>[{p.cta} →]</Link>
+        <button type="button" className="btn sketch" onClick={() => onOpen?.(p.slug)} aria-haspopup="dialog" style={{ alignSelf: 'flex-start' }}>[{p.cta} →]</button>
       ) : (
         // Copy shown on the turning leaf: same look, but no SVG filter to re-run every frame.
         <span className={`btn ${styles.ghostBtn}`} style={{ alignSelf: 'flex-start' }}>[{p.cta} →]</span>
@@ -47,7 +46,7 @@ function RightPage({ p, i, live }: { p: ProjectSummary; i: number; live?: boolea
 }
 
 /** Narrow screens: one page per project, everything on it. */
-function SinglePage({ p, i, live }: { p: ProjectSummary; i: number; live?: boolean }) {
+function SinglePage({ p, i, live, onOpen }: { p: ProjectSummary; i: number; live?: boolean; onOpen?: (slug: string) => void }) {
   return (
     <div className={`${styles.page} ${styles.singlePage}`}>
       <Cover p={p} height={160} sizes="100vw" />
@@ -57,7 +56,7 @@ function SinglePage({ p, i, live }: { p: ProjectSummary; i: number; live?: boole
       <p className={styles.blurb}>{p.blurb}</p>
       <p className={styles.stack}>{p.stack}</p>
       {live ? (
-        <Link className="btn sketch" href={p.link} style={{ alignSelf: 'flex-start' }}>[{p.cta} →]</Link>
+        <button type="button" className="btn sketch" onClick={() => onOpen?.(p.slug)} aria-haspopup="dialog" style={{ alignSelf: 'flex-start' }}>[{p.cta} →]</button>
       ) : (
         <span className={`btn ${styles.ghostBtn}`} style={{ alignSelf: 'flex-start' }}>[{p.cta} →]</span>
       )}
@@ -66,7 +65,7 @@ function SinglePage({ p, i, live }: { p: ProjectSummary; i: number; live?: boole
   );
 }
 
-export function Sketchbook({ projects }: { projects: ProjectSummary[] }) {
+export function Sketchbook({ projects, onOpen }: { projects: ProjectSummary[]; onOpen: (slug: string) => void }) {
   const [index, setIndex] = useState(0);
   const [turn, setTurn] = useState<Turn | null>(null);
   const reducedMotion = useRef(false);
@@ -166,7 +165,7 @@ export function Sketchbook({ projects }: { projects: ProjectSummary[] }) {
 
       <div className={styles.spread}>
         <LeftPage p={projects[leftIdx]} i={leftIdx} live={!turn} />
-        <RightPage p={projects[rightIdx]} i={rightIdx} live={!turn} />
+        <RightPage p={projects[rightIdx]} i={rightIdx} live={!turn} onOpen={onOpen} />
 
         {turn && (
           <div
@@ -189,7 +188,7 @@ export function Sketchbook({ projects }: { projects: ProjectSummary[] }) {
           "Prev" brings the earlier page back down. Hidden leaves never animate, so only the
           visible layout's animationend finishes the turn. */}
       <div className={styles.pad}>
-        <SinglePage p={projects[turn ? (turn.dir === 'next' ? turn.to : turn.from) : index]} i={turn ? (turn.dir === 'next' ? turn.to : turn.from) : index} live={!turn} />
+        <SinglePage p={projects[turn ? (turn.dir === 'next' ? turn.to : turn.from) : index]} i={turn ? (turn.dir === 'next' ? turn.to : turn.from) : index} live={!turn} onOpen={onOpen} />
         {turn && (
           <div
             className={`${styles.leaf} ${styles.leafPad} ${turn.dir === 'next' ? styles.flipUp : styles.flipDown}`}

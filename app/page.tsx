@@ -1,6 +1,6 @@
 import Image from 'next/image';
 import { SiteHeader } from '@/components/SiteHeader';
-import { getNotes, getProjectSummaries } from '@/lib/content';
+import { getNotes, getProjects, getProjectSummaries } from '@/lib/content';
 import { ProjectsSection } from '@/components/projects/ProjectsSection';
 import { site } from '@/lib/site';
 import { Guestbook } from '@/components/guestbook/Guestbook';
@@ -95,7 +95,7 @@ export default async function Home() {
 
       <ProjectsSection
         projects={getProjectSummaries()}
-        lead="That curiosity is what pulled me into product. Most recently I built Ramble, an AI-powered journaling app, from scratch: I wrote the PRD, benchmarked competing apps to shape the roadmap, and built it end to end with Next.js, Supabase and the Claude API. Before that, I grew an online community from zero to 1,500+ members, led the creation of a full-stack tool for League of Legends teams, and redesigned recruitment for a University of Calgary engineering team, more than doubling its membership."
+        bodies={Object.fromEntries(getProjects().map((p) => [p.slug, <Prose key={p.slug} source={p.body} />]))}
       />
 
       {/* SKILLS */}
