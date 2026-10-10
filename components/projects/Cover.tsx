@@ -3,12 +3,13 @@ import { Hatch } from '@/components/sketch/PencilFilters';
 import styles from './Cover.module.css';
 
 /**
- * A project's cover: the image from its frontmatter (`image`), cropped to fill a box of the
- * given height, or the hatched placeholder when there isn't one yet. Covers are drawn at
- * 1600x800 with the subject in the middle ~70%, so every slot's crop keeps it.
+ * A project's cover: the image from its frontmatter (`image`) in a box of the given height,
+ * or the hatched placeholder when there isn't one yet. Covers are pencil drawings on white,
+ * so by default the whole drawing is fitted (`contain`) and the spare space blends into the
+ * paper; set `imageFit: cover` for photos/screenshots that should crop to fill.
  */
 export function Cover({ p, height, sizes, priority }: {
-  p: { title: string; cover: string; image?: string };
+  p: { title: string; cover: string; image?: string; imageFit?: 'contain' | 'cover' };
   height: number;
   sizes: string;
   priority?: boolean;
@@ -22,7 +23,7 @@ export function Cover({ p, height, sizes, priority }: {
         fill
         sizes={sizes}
         priority={priority}
-        style={{ objectFit: 'cover' }}
+        style={{ objectFit: p.imageFit ?? 'contain' }}
       />
     </div>
   );

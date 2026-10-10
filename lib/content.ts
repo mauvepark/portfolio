@@ -14,6 +14,8 @@ export type Project = {
   cover: string;
   /** Cover image in public/ (1600x800); falls back to a hatched placeholder labelled `cover`. */
   image?: string;
+  /** contain (default): whole drawing fits, spare space blends into the paper. cover: crop to fill (photos, screenshots). */
+  imageFit?: 'contain' | 'cover';
   cta: string;
   /** External link; when absent the card links to /projects/[slug]. */
   href?: string;
