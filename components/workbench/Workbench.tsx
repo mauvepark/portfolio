@@ -13,6 +13,11 @@ function timeAgo(iso: string) {
   return daysAgo < 30 ? `${daysAgo}d ago` : new Date(iso).toLocaleDateString('en-CA', { month: 'short', day: 'numeric' });
 }
 
+/** "2026-06-03" → "Jun 3" (UTC, so the day can't shift with the server's timezone). */
+function shortDate(iso: string) {
+  return new Date(`${iso.slice(0, 10)}T00:00:00Z`).toLocaleDateString('en-CA', { month: 'short', day: 'numeric', timeZone: 'UTC' });
+}
+
 /** A closed book in pencil: cover, spine, page edges and a red bookmark ribbon. */
 function BookSketch() {
   return (
@@ -100,6 +105,11 @@ export async function Workbench() {
               <div>
                 <a className={styles.bookTitle} href={book.url}>{book.title}</a>
                 {book.authors.length > 0 && <p className={styles.body}>by {book.authors.join(', ')}</p>}
+                {book.genres.length > 0 && (
+                  <ul className={styles.genres} aria-label="Genre">
+                    {book.genres.map((g) => <li key={g}>{g}</li>)}
+                  </ul>
+                )}
               </div>
             </div>
             {book.percent !== null && (
@@ -112,6 +122,15 @@ export async function Workbench() {
                   {book.pagesRead !== null && book.pages ? `p. ${book.pagesRead} / ${book.pages} · ` : ''}{book.percent}%
                 </p>
               </>
+            )}
+            {book.lastFinished && (
+              <div className={styles.finished}>
+                <p className="label label-sm">Last finished</p>
+                <p className={styles.body}>
+                  <a href={book.lastFinished.url}>{book.lastFinished.title}</a>
+                  {book.lastFinished.date && <span className={styles.finishedDate}> · {shortDate(book.lastFinished.date)}</span>}
+                </p>
+              </div>
             )}
           </li>
         )}
