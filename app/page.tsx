@@ -101,7 +101,7 @@ export default async function Home() {
               className={styles.photoImg}
             />
             <figcaption className={`aside ${styles.caption}`}>
-              hello :3
+              .𖥔 ݁⭑˖๋ 𖥔. ݁ 𖥔˖๋ ࣭ ⭑
             </figcaption>
           </figure>
         </div>
