@@ -6,6 +6,7 @@ import { site } from "@/lib/site";
 import { Guestbook } from "@/components/guestbook/Guestbook";
 import { Workbench } from "@/components/workbench/Workbench";
 import { NotesSection } from "@/components/notes/NotesSection";
+import { CatToggle } from "@/components/cat/CatToggle";
 import { Prose } from "@/components/Prose";
 import { PAGE_SIZE, PUBLIC_COLUMNS, type Entry } from "@/lib/guestbook";
 import { supabasePublic } from "@/lib/supabase";
@@ -252,6 +253,7 @@ export default async function Home() {
           }}
         >
           <span>Sketched by Noor Ali</span>
+          <CatToggle />
           <span>Canada · 2026</span>
         </footer>
       </section>
