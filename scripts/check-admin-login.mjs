@@ -22,6 +22,7 @@ const [, salt, expected] = envHash.split(':');
 const actual = scryptSync(password, Buffer.from(salt, 'base64'), 64);
 const exp = Buffer.from(expected, 'base64');
 
-console.log(`\nUsername matches: ${username.trim().toLowerCase() === envUser.toLowerCase() ? 'yes' : 'NO'}`);
+const userOk = username.trim().toLowerCase() === envUser.toLowerCase();
+console.log(`\nUsername matches: ${userOk ? 'yes' : `NO (you typed ${username.trim().length} characters; .env.local has ${envUser.length})`}`);
 console.log(`Password matches: ${actual.length === exp.length && timingSafeEqual(actual, exp) ? 'yes' : 'NO'}`);
 console.log(`(password length typed: ${password.length})`);
