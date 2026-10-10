@@ -9,7 +9,7 @@ import styles from './Cover.module.css';
  * paper; set `imageFit: cover` for photos/screenshots that should crop to fill.
  */
 export function Cover({ p, height, sizes, priority }: {
-  p: { title: string; cover: string; image?: string; imageFit?: 'contain' | 'cover' };
+  p: { title: string; cover: string; image?: string; imageFit?: 'contain' | 'cover'; imageAlt?: string };
   height: number;
   sizes: string;
   priority?: boolean;
@@ -19,7 +19,7 @@ export function Cover({ p, height, sizes, priority }: {
     <div className={styles.cover} style={{ height }}>
       <Image
         src={p.image}
-        alt={`${p.title} cover`}
+        alt={p.imageAlt ?? `${p.title} cover`}
         fill
         sizes={sizes}
         priority={priority}

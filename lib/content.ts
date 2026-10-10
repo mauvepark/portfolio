@@ -16,6 +16,8 @@ export type Project = {
   image?: string;
   /** contain (default): whole drawing fits, spare space blends into the paper. cover: crop to fill (photos, screenshots). */
   imageFit?: 'contain' | 'cover';
+  /** Alt text for the cover; defaults to "<title> cover". */
+  imageAlt?: string;
   cta: string;
   /** External link; when absent the card links to /projects/[slug]. */
   href?: string;
