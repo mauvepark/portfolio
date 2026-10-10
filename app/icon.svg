@@ -1,0 +1,5 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 64 64">
+  <!-- Favicon: a pencil "N" in the site's accent on a small paper card. -->
+  <rect x="3" y="3" width="58" height="58" rx="12" fill="#FBFAF7" stroke="#262624" stroke-width="3"/>
+  <path d="M19 47 L20 17 L44 46 L45 16" fill="none" stroke="#A8432E" stroke-width="6" stroke-linecap="round" stroke-linejoin="round"/>
+</svg>
