@@ -1,5 +1,4 @@
 .signIn { max-width: 440px; background: var(--card); padding: 26px; display: flex; flex-direction: column; gap: 16px; }
-.lead { margin: 0; font-size: 17px; line-height: 1.5; }
 .field { display: flex; flex-direction: column; gap: 6px; }
 .field input {
   font: inherit; font-size: 17px; color: var(--ink); background: transparent; min-height: 44px;

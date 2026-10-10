@@ -139,6 +139,9 @@ export function Guestbook({ initial }: { initial: Entry[] }) {
           )}
         </div>
       </div>
+
+      {/* Quiet way in for moderation; /admin itself is protected by its own sign-in. */}
+      <a href="/admin" className={styles.adminLink}>[admin]</a>
     </section>
   );
 }

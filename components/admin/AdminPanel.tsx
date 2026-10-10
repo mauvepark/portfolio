@@ -1,74 +1,94 @@
 'use client';
 
-import type { Session } from '@supabase/supabase-js';
 import { useCallback, useEffect, useState } from 'react';
 import { DoodleSvg } from '@/components/guestbook/DoodleSvg';
 import type { Stroke } from '@/lib/guestbook';
-import { supabaseAuth } from '@/lib/supabase-auth';
 import styles from './AdminPanel.module.css';
 
 type Row = { id: string; name: string; message: string; doodle: Stroke[]; approved: boolean; created_at: string };
 type Tab = 'pending' | 'approved';
+type SessionState = { configured: boolean; signedIn: boolean } | null; // null = still checking
 
-/** Guestbook moderation: magic-link sign-in, then approve / hide / delete entries. */
+const linkButton = { background: 'none', border: 0, padding: 0, cursor: 'pointer', color: 'var(--ink)' } as const;
+
+/** Guestbook moderation: username/password sign-in (session cookie), then approve / hide / delete. */
 export function AdminPanel() {
-  const [session, setSession] = useState<Session | null | undefined>(undefined); // undefined = still checking
+  const [session, setSession] = useState<SessionState>(null);
 
-  useEffect(() => {
-    const auth = supabaseAuth().auth;
-    auth.getSession().then(({ data }) => setSession(data.session));
-    const { data } = auth.onAuthStateChange((_event, s) => setSession(s));
-    return () => data.subscription.unsubscribe();
+  const check = useCallback(async () => {
+    const res = await fetch('/api/admin/session', { cache: 'no-store' }).catch(() => null);
+    setSession(res?.ok ? await res.json() : { configured: true, signedIn: false });
   }, []);
+
+  useEffect(() => { check(); }, [check]);
+
+  const expired = useCallback(() => setSession({ configured: true, signedIn: false }), []);
+
+  async function signOut() {
+    await fetch('/api/admin/session', { method: 'DELETE' }).catch(() => null);
+    setSession((s) => (s ? { ...s, signedIn: false } : s));
+  }
 
   return (
     <section className="section" style={{ paddingTop: 48 }}>
       <div className="section-head">
         <h1 className="section-title">guestbook admin</h1>
-        {session && (
-          <button type="button" className="navlink" onClick={() => supabaseAuth().auth.signOut()}
-            style={{ background: 'none', border: 0, padding: 0, cursor: 'pointer', color: 'var(--ink)' }}>
-            [Sign out]
-          </button>
-        )}
+        {session?.signedIn && <button type="button" className="navlink" onClick={signOut} style={linkButton}>[Sign out]</button>}
       </div>
-      {session === undefined ? <p className="label">Checking sign-in…</p> : session ? <Moderation session={session} /> : <SignIn />}
+      {session === null ? (
+        <p className="label">Checking sign-in…</p>
+      ) : !session.configured ? (
+        <p className="lede">Admin isn&apos;t set up yet: add ADMIN_USERNAME and ADMIN_PASSWORD_HASH to the environment.</p>
+      ) : session.signedIn ? (
+        <Moderation onSignedOut={expired} />
+      ) : (
+        <SignIn onSignedIn={() => setSession({ configured: true, signedIn: true })} />
+      )}
     </section>
   );
 }
 
-function SignIn() {
-  const [email, setEmail] = useState('');
-  const [status, setStatus] = useState<{ kind: 'idle' | 'sending' | 'sent' | 'error'; message?: string }>({ kind: 'idle' });
+function SignIn({ onSignedIn }: { onSignedIn: () => void }) {
+  const [username, setUsername] = useState('');
+  const [password, setPassword] = useState('');
+  const [status, setStatus] = useState<{ kind: 'idle' | 'sending' | 'error'; message?: string }>({ kind: 'idle' });
 
   async function submit(e: React.FormEvent) {
     e.preventDefault();
     setStatus({ kind: 'sending' });
-    const res = await fetch('/api/admin/login', {
+    const res = await fetch('/api/admin/session', {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ email }),
+      body: JSON.stringify({ username, password }),
     }).catch(() => null);
+    if (res?.ok) {
+      setPassword('');
+      onSignedIn();
+      return;
+    }
     const body = res ? await res.json().catch(() => ({})) : {};
-    setStatus(res?.ok ? { kind: 'sent', message: body.message } : { kind: 'error', message: body.error ?? 'Something went wrong.' });
+    setStatus({ kind: 'error', message: body.error ?? 'Something went wrong.' });
   }
 
   return (
     <form className={`sketch ${styles.signIn}`} onSubmit={submit}>
-      <p className={styles.lead}>Sign in with a one-time link sent to the admin email.</p>
       <label className={styles.field}>
-        <span className="label label-sm">Email</span>
-        <input type="email" required autoComplete="email" value={email} onChange={(e) => setEmail(e.target.value)} />
+        <span className="label label-sm">Username</span>
+        <input required autoComplete="username" value={username} onChange={(e) => setUsername(e.target.value)} />
+      </label>
+      <label className={styles.field}>
+        <span className="label label-sm">Password</span>
+        <input type="password" required autoComplete="current-password" value={password} onChange={(e) => setPassword(e.target.value)} />
       </label>
       <button className="btn sketch" type="submit" disabled={status.kind === 'sending'} style={{ alignSelf: 'flex-start' }}>
-        {status.kind === 'sending' ? '[Sending…]' : '[Email me a link]'}
+        {status.kind === 'sending' ? '[Signing in…]' : '[Sign in]'}
       </button>
-      {status.message && <p role="status" className={styles.status} data-kind={status.kind}>{status.message}</p>}
+      {status.message && <p role="alert" className={styles.status} data-kind={status.kind}>{status.message}</p>}
     </form>
   );
 }
 
-function Moderation({ session }: { session: Session }) {
+function Moderation({ onSignedOut }: { onSignedOut: () => void }) {
   const [tab, setTab] = useState<Tab>('pending');
   const [rows, setRows] = useState<Row[] | null>(null);
   const [error, setError] = useState<string | null>(null);
@@ -78,10 +98,13 @@ function Moderation({ session }: { session: Session }) {
     (init?: RequestInit, query = '') =>
       fetch(`/api/admin/guestbook${query}`, {
         ...init,
-        headers: { 'Content-Type': 'application/json', Authorization: `Bearer ${session.access_token}` },
+        headers: { 'Content-Type': 'application/json' },
         cache: 'no-store',
+      }).then((res) => {
+        if (res.status === 401) onSignedOut(); // session expired
+        return res;
       }),
-    [session.access_token],
+    [onSignedOut],
   );
 
   const load = useCallback(async () => {
@@ -127,8 +150,7 @@ function Moderation({ session }: { session: Session }) {
             </button>
           ))}
         </div>
-        <span className="label label-sm">Signed in as {session.user.email}</span>
-        <button type="button" className="navlink" onClick={load} style={{ background: 'none', border: 0, padding: 0, cursor: 'pointer', color: 'var(--ink)' }}>
+        <button type="button" className="navlink" onClick={load} style={linkButton}>
           [Refresh]
         </button>
       </div>

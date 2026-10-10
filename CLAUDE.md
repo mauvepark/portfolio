@@ -8,6 +8,7 @@ Next.js 15 (App Router, TypeScript) — Supabase + Vercel planned. `npm run dev`
 - `app/` routes · `components/` (sketch primitives in `components/sketch/`) · `lib/content.ts` reads MDX · `lib/site.ts` holds email + links.
 - Projects and notes are MDX in `content/projects` and `content/notes` (frontmatter drives cards: `order`, `image`/`imageAlt`/`imageFit` for covers in `public/projects/`).
 - On the homepage, projects and notes open as cards (`components/sketch/SketchDialog.tsx`) with linkable hashes `#project-<slug>` / `#note-<slug>`; `/projects/[slug]` and `/notes/[slug]` pages still exist for direct links.
+- Guestbook moderation at `/admin` (faint `[admin]` link under the guestbook): username + password from `ADMIN_USERNAME` / `ADMIN_PASSWORD_HASH` (generate the hash with `npm run admin:hash`), signed httpOnly session cookie; see `lib/admin.ts`.
 - `design/` holds the original static mockup for visual reference — not served.
 - Roadmap: `~/.claude/plans/i-have-some-very-hashed-russell.md` (doodle guestbook → sketchbook page-turn → live workbench).
 

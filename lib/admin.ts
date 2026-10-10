@@ -1,29 +1,71 @@
 import 'server-only';
+import { createHmac, scryptSync, timingSafeEqual } from 'node:crypto';
 import { NextResponse, type NextRequest } from 'next/server';
-import { supabaseAdmin } from './supabase-admin';
 
-/** The one email allowed into /admin. Unset means the admin area is disabled. */
-export function adminEmail() {
-  return process.env.ADMIN_EMAIL?.trim().toLowerCase() || null;
+/*
+ * Admin auth: one username + password from env, a signed session cookie.
+ *
+ *   ADMIN_USERNAME       the username
+ *   ADMIN_PASSWORD_HASH  "scrypt:<salt>:<hash>" from `npm run admin:hash` (the password itself is never stored)
+ *
+ * The cookie is "<expiry>.<hmac>", signed with a key derived from the service-role key and the
+ * password hash, so changing the password signs everyone out.
+ */
+export const SESSION_COOKIE = 'admin_session';
+export const SESSION_MAX_AGE = 60 * 60 * 24 * 7; // 7 days
+
+function config() {
+  const username = process.env.ADMIN_USERNAME?.trim();
+  const hash = process.env.ADMIN_PASSWORD_HASH?.trim();
+  const secret = process.env.SUPABASE_SERVICE_ROLE_KEY;
+  if (!username || !hash?.startsWith('scrypt:') || !secret) return null;
+  return { username, hash, key: createHmac('sha256', secret).update(`admin-session:${hash}`).digest() };
 }
 
-/**
- * Gate for admin API routes. Expects the Supabase session's access token as a Bearer token,
- * verifies it with Supabase, and only passes if the signed-in user is ADMIN_EMAIL with a
- * confirmed address. Returns an error response to send back, or null when allowed.
- */
-export async function requireAdmin(req: NextRequest): Promise<NextResponse | null> {
-  const allowed = adminEmail();
-  if (!allowed) return NextResponse.json({ error: 'Admin is not configured' }, { status: 503 });
+const same = (a: Buffer, b: Buffer) => a.length === b.length && timingSafeEqual(a, b);
+const sign = (key: Buffer, value: string) => createHmac('sha256', key).update(value).digest('base64url');
 
-  const token = req.headers.get('authorization')?.match(/^Bearer (.+)$/i)?.[1];
-  if (!token) return NextResponse.json({ error: 'Sign in first' }, { status: 401 });
+/** Constant-time check of both username and password. */
+export function verifyCredentials(username: string, password: string): boolean {
+  const cfg = config();
+  if (!cfg) return false;
+  const [, salt, expected] = cfg.hash.split(':'); // ':' not '$': Next's .env loader expands $NAME
+  const actual = scryptSync(password, Buffer.from(salt, 'base64'), 64);
+  const userOk = same(Buffer.from(sign(cfg.key, username)), Buffer.from(sign(cfg.key, cfg.username)));
+  const passOk = same(actual, Buffer.from(expected, 'base64'));
+  return userOk && passOk;
+}
 
-  const { data, error } = await supabaseAdmin().auth.getUser(token);
-  const user = data?.user;
-  if (error || !user) return NextResponse.json({ error: 'Session expired, sign in again' }, { status: 401 });
-  if (user.email?.toLowerCase() !== allowed || !user.email_confirmed_at) {
-    return NextResponse.json({ error: 'Not allowed' }, { status: 403 });
-  }
+export function isConfigured() {
+  return config() !== null;
+}
+
+export function sessionCookieValue(): string | null {
+  const cfg = config();
+  if (!cfg) return null;
+  const exp = String(Math.floor(Date.now() / 1000) + SESSION_MAX_AGE);
+  return `${exp}.${sign(cfg.key, exp)}`;
+}
+
+export function isSignedIn(req: NextRequest): boolean {
+  const cfg = config();
+  const value = req.cookies.get(SESSION_COOKIE)?.value;
+  if (!cfg || !value) return false;
+  const [exp, mac] = value.split('.');
+  if (!exp || !mac || Number(exp) < Date.now() / 1000) return false;
+  return same(Buffer.from(mac), Buffer.from(sign(cfg.key, exp)));
+}
+
+/** Same-origin check for state-changing requests (defence in depth on top of SameSite=Strict). */
+export function sameOrigin(req: NextRequest) {
+  const origin = req.headers.get('origin');
+  return !origin || origin === req.nextUrl.origin;
+}
+
+/** Gate for admin API routes: returns an error response to send back, or null when allowed. */
+export function requireAdmin(req: NextRequest): NextResponse | null {
+  if (!isConfigured()) return NextResponse.json({ error: 'Admin is not configured' }, { status: 503 });
+  if (req.method !== 'GET' && !sameOrigin(req)) return NextResponse.json({ error: 'Bad origin' }, { status: 403 });
+  if (!isSignedIn(req)) return NextResponse.json({ error: 'Sign in first' }, { status: 401 });
   return null;
 }
