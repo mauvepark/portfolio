@@ -34,11 +34,12 @@ function simplify(p: number[], epsilon = 1.2): number[] {
 
 const pointCount = (strokes: Stroke[]) => strokes.reduce((n, s) => n + s.p.length / 2, 0);
 
+const STROKE_W = 2.4; // in doodle units (the 320x240 box)
+
 export function DoodlePad({ strokes, onChange }: { strokes: Stroke[]; onChange: (s: Stroke[]) => void }) {
   const padRef = useRef<HTMLDivElement>(null);
-  const liveRef = useRef<SVGPathElement>(null);
-  const points = useRef<number[] | null>(null); // the stroke being drawn (unrounded)
-  const frame = useRef(0);
+  const canvasRef = useRef<HTMLCanvasElement>(null);
+  const points = useRef<number[] | null>(null); // the stroke being drawn, in doodle units (unrounded)
   const [color, setColor] = useState<0 | 1>(0);
   const [drawing, setDrawing] = useState(false);
   const full = strokes.length >= MAX_STROKES || pointCount(strokes) >= MAX_POINTS;
@@ -57,27 +58,84 @@ export function DoodlePad({ strokes, onChange }: { strokes: Stroke[]; onChange: 
     };
   }, []);
 
+  // Keep the live-drawing canvas at the pad's size in device pixels, so lines stay crisp.
+  useEffect(() => {
+    const canvas = canvasRef.current;
+    if (!canvas) return;
+    const fit = () => {
+      const { width, height } = canvas.getBoundingClientRect();
+      const dpr = Math.min(window.devicePixelRatio || 1, 3);
+      canvas.width = Math.round(width * dpr);
+      canvas.height = Math.round(height * dpr);
+    };
+    fit();
+    const ro = new ResizeObserver(fit);
+    ro.observe(canvas);
+    return () => ro.disconnect();
+  }, []);
+
   function toPoint(e: { clientX: number; clientY: number }, r: DOMRect) {
     const x = ((e.clientX - r.left) / r.width) * DOODLE_W;
     const y = ((e.clientY - r.top) / r.height) * DOODLE_H;
     return [Math.min(DOODLE_W, Math.max(0, x)), Math.min(DOODLE_H, Math.max(0, y))];
   }
 
-  // Draw the live stroke straight to the DOM, at most once per frame, instead of re-rendering React.
-  function paint() {
-    frame.current = 0;
-    if (liveRef.current && points.current) liveRef.current.setAttribute('d', strokeToPath(points.current));
+  /*
+   * The live stroke is drawn on a canvas, one small segment per new point, so each move costs
+   * the same however long the stroke is (re-rendering a growing SVG path each frame was choppy
+   * on phones). Segments are quadratic curves through midpoints, matching strokeToPath, and the
+   * finished stroke is handed to the SVG as usual on lift.
+   */
+  function ctx() {
+    const canvas = canvasRef.current;
+    const c = canvas?.getContext('2d');
+    if (!canvas || !c) return null;
+    const k = canvas.width / DOODLE_W; // doodle units → canvas pixels
+    return { c, k, canvas };
   }
-  const schedule = () => { if (!frame.current) frame.current = requestAnimationFrame(paint); };
+
+  function startInk(x: number, y: number) {
+    const g = ctx();
+    if (!g) return;
+    const { c, k, canvas } = g;
+    c.clearRect(0, 0, canvas.width, canvas.height);
+    c.strokeStyle = c.fillStyle = getComputedStyle(padRef.current!).getPropertyValue(color ? '--accent' : '--graphite').trim() || '#2E2E2B';
+    c.lineWidth = STROKE_W * k;
+    c.lineCap = c.lineJoin = 'round';
+    c.beginPath();
+    c.arc(x * k, y * k, (STROKE_W * k) / 2, 0, Math.PI * 2); // a dot until the finger moves
+    c.fill();
+  }
+
+  /** Draw from the previous midpoint, curving through the previous point, to the new midpoint. */
+  function inkSegment(pts: number[]) {
+    const g = ctx();
+    if (!g) return;
+    const { c, k } = g;
+    const n = pts.length / 2;
+    const [ax, ay, bx, by] = n >= 3 ? pts.slice(-6, -2) : [pts[0], pts[1], pts[0], pts[1]];
+    const [cx, cy] = pts.slice(-2);
+    const startX = n >= 3 ? (ax + bx) / 2 : ax, startY = n >= 3 ? (ay + by) / 2 : ay;
+    c.beginPath();
+    c.moveTo(startX * k, startY * k);
+    c.quadraticCurveTo(bx * k, by * k, ((bx + cx) / 2) * k, ((by + cy) / 2) * k);
+    c.stroke();
+  }
+
+  function clearInk() {
+    const g = ctx();
+    g?.c.clearRect(0, 0, g.canvas.width, g.canvas.height);
+  }
 
   function down(e: React.PointerEvent<HTMLDivElement>) {
     if (full || (e.pointerType === 'mouse' && e.button !== 0)) return;
     e.preventDefault();
     // Keep receiving moves if the finger strays off the pad; drawing still works if capture fails.
     try { e.currentTarget.setPointerCapture(e.pointerId); } catch {}
-    points.current = toPoint(e, e.currentTarget.getBoundingClientRect());
+    const [x, y] = toPoint(e, e.currentTarget.getBoundingClientRect());
+    points.current = [x, y];
     setDrawing(true);
-    schedule();
+    startInk(x, y);
   }
 
   function move(e: React.PointerEvent<HTMLDivElement>) {
@@ -88,20 +146,19 @@ export function DoodlePad({ strokes, onChange }: { strokes: Stroke[]; onChange: 
     const samples = e.nativeEvent.getCoalescedEvents?.() ?? [];
     for (const ev of samples.length ? samples : [e.nativeEvent]) {
       const [x, y] = toPoint(ev, r);
-      const lx = pts[pts.length - 2], ly = pts[pts.length - 1];
-      if (Math.hypot(x - lx, y - ly) >= 1.2) pts.push(x, y);
+      if (Math.hypot(x - pts[pts.length - 2], y - pts[pts.length - 1]) < 1.2) continue;
+      pts.push(x, y);
+      inkSegment(pts);
     }
-    schedule();
   }
 
   function up() {
     const pts = points.current;
     if (!pts) return;
     points.current = null;
-    cancelAnimationFrame(frame.current);
-    frame.current = 0;
     setDrawing(false);
     onChange([...strokes, { c: color, p: simplify(pts.map(Math.round)) }]);
+    clearInk(); // the SVG now draws the finished stroke
   }
 
   return (
@@ -121,11 +178,16 @@ export function DoodlePad({ strokes, onChange }: { strokes: Stroke[]; onChange: 
         } as React.CSSProperties}
       >
         <svg viewBox={`0 0 ${DOODLE_W} ${DOODLE_H}`} aria-hidden="true" style={{ display: 'block', width: '100%', height: 'auto', pointerEvents: 'none' }}>
-          <g fill="none" strokeWidth={2.4} strokeLinecap="round" strokeLinejoin="round">
+          <g fill="none" strokeWidth={STROKE_W} strokeLinecap="round" strokeLinejoin="round">
             {strokes.map((s, i) => <path key={i} d={strokeToPath(s.p)} stroke={COLORS[s.c]} />)}
-            {drawing && <path ref={liveRef} stroke={COLORS[color]} />}
           </g>
         </svg>
+        {/* Live ink on its own compositor layer, so drawing never repaints the filtered pencil border. */}
+        <canvas
+          ref={canvasRef}
+          aria-hidden="true"
+          style={{ position: 'absolute', inset: 0, width: '100%', height: '100%', pointerEvents: 'none', willChange: 'transform' }}
+        />
         {strokes.length === 0 && !drawing && (
           <span className="aside" style={{ position: 'absolute', inset: 0, display: 'grid', placeItems: 'center', pointerEvents: 'none', opacity: 0.45 }}>
             doodle something here ✎
