@@ -1,6 +1,8 @@
 // Single place for links and contact details.
 export const site = {
   name: 'Noor Ali',
+  /** Canonical address: link previews, sitemap and robots use it. */
+  url: 'https://www.noorali.me',
   email: 'nooraliyyc@gmail.com',
   /** GitHub login the workbench reads public activity for. */
   githubUser: 'mauvepark',

@@ -23,11 +23,11 @@
 
 .text { flex: 999 1 380px; min-width: 0; container-type: inline-size; display: flex; flex-direction: column; gap: clamp(8px, 2.2vh, 22px); }
 /*
- * Always three lines. The longest ("and sketch the why.") is 6.92x the font size wide, so
- * 13.8cqi (13.8% of the text column) keeps it on one line at any width; the vh term keeps
+ * Always three lines. The longest ("always learning.") is 5.48x the font size wide, so
+ * 17.5cqi (17.5% of the text column) keeps it on one line at any width; the vh term keeps
  * the three lines short enough for the whole intro to fit the window's height.
  */
-.headline { margin: 0; font-weight: 700; line-height: .95; font-size: clamp(28px, min(13.8cqi, 8.6vh), 84px); }
+.headline { margin: 0; font-weight: 700; line-height: .95; font-size: clamp(28px, min(17.5cqi, 8.6vh), 84px); }
 .line { display: block; white-space: nowrap; }
 .text .lede { max-width: 680px; font-size: clamp(16px, 2.4vh, 19px); line-height: 1.55; }
 .text .principle { margin: 0; color: var(--accent); font-size: clamp(22px, 3.6vh, 30px); line-height: 1.15; }
@@ -37,7 +37,7 @@
 /* Very short windows (small laptop with toolbars, bookmarks bar): tighten so the intro still fits. */
 @media (min-width: 701px) and (max-height: 560px) {
   .intro { padding: 8px 0; }
-  .headline { font-size: clamp(28px, min(13.8cqi, 7.4vh), 84px); }
+  .headline { font-size: clamp(28px, min(17.5cqi, 7.4vh), 84px); }
   .text { gap: clamp(6px, 1.5vh, 22px); }
 }
 
