@@ -6,7 +6,9 @@
     "dev": "next dev",
     "build": "next build",
     "start": "next start",
-    "lint": "next lint"
+    "lint": "next lint",
+    "admin:hash": "node scripts/hash-admin-password.mjs",
+    "admin:check": "node scripts/check-admin-login.mjs"
   },
   "dependencies": {
     "@supabase/supabase-js": "^2.117.3",
