@@ -1,0 +1,123 @@
+/* The wrapper never takes clicks; only the cat itself (and [shoo]) do. */
+.cat {
+  position: fixed; left: 0; bottom: 0; z-index: 40;
+  width: 84px; height: 60px;
+  pointer-events: none; will-change: transform;
+}
+
+.pet {
+  position: absolute; inset: 0; display: block;
+  padding: 0; border: 0; background: none; cursor: pointer;
+  pointer-events: auto; -webkit-tap-highlight-color: transparent;
+}
+.flip { display: block; transform: scaleX(var(--dir, 1)); transition: transform .2s ease; }
+.svg { display: block; overflow: visible; }
+
+/* ---------- parts ---------- */
+.leg, .tail, .head, .torso, .eyesOpen { transform-box: fill-box; }
+.leg { transform-origin: 50% 0; }
+.legs { transition: opacity .3s ease; }
+.torso { transition: transform .4s ease; }
+.tail { transform-origin: 100% 100%; animation: swish 3.2s ease-in-out infinite; }
+.head { transform-origin: 20% 90%; transition: transform .4s ease; }
+.eyesOpen { transform-origin: center; animation: blink 5s infinite; }
+.pupils { transform: translate(calc(var(--look-x, 0px) * .5), calc(var(--look-y, 0px) * .4)); transition: transform .15s linear; }
+.eyesClosed, .eyesHappy { display: none; }
+
+@keyframes swish { 0%, 100% { transform: rotate(0); } 50% { transform: rotate(-12deg); } }
+@keyframes blink { 0%, 95%, 100% { transform: scaleY(1); } 97% { transform: scaleY(.1); } }
+@keyframes stepA { from { transform: rotate(18deg); } to { transform: rotate(-18deg); } }
+@keyframes stepB { from { transform: rotate(-18deg); } to { transform: rotate(18deg); } }
+@keyframes bob { to { transform: translateY(-1.2px); } }
+@keyframes hop { 0%, 100% { transform: translateY(0); } 45% { transform: translateY(-14px); } }
+
+/* ---------- poses ---------- */
+.cat[data-pose='walk'] .legA { animation: stepA .4s ease-in-out infinite alternate; }
+.cat[data-pose='walk'] .legB { animation: stepB .4s ease-in-out infinite alternate; }
+.cat[data-pose='walk'] .torso { animation: bob .2s ease-in-out infinite alternate; }
+
+.cat[data-pose='run'] .legA { animation: stepA .14s linear infinite alternate; }
+.cat[data-pose='run'] .legB { animation: stepB .14s linear infinite alternate; }
+.cat[data-pose='run'] .tail,
+.cat[data-pose='startled'] .tail { animation: none; stroke-width: 5; transform: rotate(-20deg); }
+
+.cat[data-pose='startled'] .flip { animation: hop .38s ease-out; }
+
+.cat[data-pose='loaf'] .legs,
+.cat[data-pose='sleep'] .legs { opacity: 0; }
+.cat[data-pose='loaf'] .torso,
+.cat[data-pose='sleep'] .torso { transform: translateY(11px); }
+.cat[data-pose='sleep'] .head { transform: rotate(14deg); }
+.cat[data-pose='sleep'] .tail { animation: none; }
+.cat[data-pose='sleep'] .eyesOpen { display: none; }
+.cat[data-pose='sleep'] .eyesClosed { display: inline; }
+
+.cat[data-pose='pet'] .head { transform: rotate(-8deg); }
+.cat[data-pose='pet'] .tail { animation-duration: .5s; }
+.cat[data-pose='pet'] .eyesOpen { display: none; }
+.cat[data-pose='pet'] .eyesHappy { display: inline; }
+
+/* ---------- speech, heart, zzz ---------- */
+.bubble {
+  position: absolute; bottom: 64px; left: 30%;
+  transform: translateX(-50%);
+  white-space: nowrap; pointer-events: none;
+  animation: pop 1.7s ease forwards;
+}
+.bubble > span {
+  display: block; padding: 2px 12px 4px;
+  background: var(--card); font-family: var(--font-hand); font-size: 24px; line-height: 1.1;
+}
+@keyframes pop {
+  0% { opacity: 0; transform: translate(-50%, 6px); }
+  12%, 80% { opacity: 1; transform: translate(-50%, 0); }
+  100% { opacity: 0; transform: translate(-50%, -4px); }
+}
+
+.heart {
+  position: absolute; bottom: 48px; left: 62%; width: 16px; height: 15px;
+  pointer-events: none; animation: float 1.4s ease-out forwards;
+}
+@keyframes float {
+  from { opacity: 1; transform: translateY(0) scale(.7); }
+  to { opacity: 0; transform: translateY(-34px) scale(1.1); }
+}
+
+.zzz {
+  position: absolute; bottom: 44px; left: 60%;
+  font-family: var(--font-hand); font-size: 20px; color: var(--muted);
+  pointer-events: none; animation: drift 2.6s ease-in-out infinite;
+}
+@keyframes drift {
+  0% { opacity: 0; transform: translate(0, 4px); }
+  30% { opacity: 1; }
+  100% { opacity: 0; transform: translate(10px, -16px); }
+}
+
+/* ---------- [shoo] ---------- */
+.shoo {
+  position: absolute; right: -10px; bottom: 50px;
+  min-height: 44px; padding: 14px 6px;
+  border: 0; background: none; cursor: pointer;
+  font-family: var(--font-mono); font-size: 11px; color: var(--muted);
+  opacity: 0; pointer-events: none; transition: opacity .2s ease;
+}
+.shoo:hover { color: var(--accent); }
+.cat:hover .shoo,
+.cat:focus-within .shoo,
+.cat[data-pose='pet'] .shoo { opacity: 1; pointer-events: auto; }
+
+@media (max-width: 339px) {
+  .cat { display: none; }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .cat *, .cat *::before, .cat *::after { animation: none !important; transition: none !important; }
+}
+
+/* footer link that brings the cat back (CatToggle) */
+.callBack {
+  font: inherit; color: inherit; background: none; border: 0; padding: 0;
+  cursor: pointer; opacity: .6;
+}
+.callBack:hover { opacity: 1; color: var(--accent); }

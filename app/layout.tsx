@@ -1,6 +1,7 @@
 import type { Metadata } from 'next';
 import { Caveat, Karla, IBM_Plex_Mono } from 'next/font/google';
 import { PencilFilters } from '@/components/sketch/PencilFilters';
+import { Cat } from '@/components/cat/Cat';
 import { site } from '@/lib/site';
 import './globals.css';
 
@@ -30,6 +31,7 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
         <div className="paper">
           <PencilFilters />
           {children}
+          <Cat />
         </div>
       </body>
     </html>
