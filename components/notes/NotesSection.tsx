@@ -1,37 +1,28 @@
 'use client';
 
-import { useCallback, useEffect, useRef, useState } from 'react';
+import { useCallback, useEffect, useState } from 'react';
+import { SketchDialog } from '@/components/sketch/SketchDialog';
 import styles from './NotesSection.module.css';
 
 type NoteMeta = { slug: string; title: string; date: string; category?: string; tldr?: string };
 
 const PREVIEW = 4;
-const hashFor = (slug: string) => `#note-${slug}`;
+const HASH = '#note-';
 
-/**
- * Notes list that opens each note as a card over the homepage (native <dialog>: Esc closes,
- * focus is trapped and returned). Bodies are rendered on the server and passed in.
- */
+/** Notes list; each note opens as a card over the homepage. Bodies are rendered on the server. */
 export function NotesSection({ notes, bodies }: { notes: NoteMeta[]; bodies: Record<string, React.ReactNode> }) {
-  const dialogRef = useRef<HTMLDialogElement>(null);
   const [openSlug, setOpenSlug] = useState<string | null>(null);
   const [showAll, setShowAll] = useState(false);
   const open = notes.find((n) => n.slug === openSlug);
 
   const show = useCallback((slug: string) => {
     setOpenSlug(slug);
-    history.replaceState(null, '', hashFor(slug));
+    history.replaceState(null, '', HASH + slug);
   }, []);
-
-  // Open the dialog once its content is rendered.
-  useEffect(() => {
-    const d = dialogRef.current;
-    if (openSlug && d && !d.open) d.showModal();
-  }, [openSlug]);
 
   // Deep link: /#note-<slug> opens that note on load.
   useEffect(() => {
-    const slug = location.hash.startsWith('#note-') ? location.hash.slice(6) : null;
+    const slug = location.hash.startsWith(HASH) ? location.hash.slice(HASH.length) : null;
     if (slug && notes.some((n) => n.slug === slug)) {
       setOpenSlug(slug);
       setShowAll(true);
@@ -40,12 +31,7 @@ export function NotesSection({ notes, bodies }: { notes: NoteMeta[]; bodies: Rec
 
   function onClose() {
     setOpenSlug(null);
-    if (location.hash.startsWith('#note-')) history.replaceState(null, '', '#notes');
-  }
-
-  // Clicking the dimmed backdrop (the dialog element itself, outside the card) closes it.
-  function onDialogClick(e: React.MouseEvent<HTMLDialogElement>) {
-    if (e.target === e.currentTarget) e.currentTarget.close();
+    if (location.hash.startsWith(HASH)) history.replaceState(null, '', '#notes');
   }
 
   const visible = showAll ? notes : notes.slice(0, PREVIEW);
@@ -77,24 +63,20 @@ export function NotesSection({ notes, bodies }: { notes: NoteMeta[]; bodies: Rec
         </button>
       )}
 
-      <dialog ref={dialogRef} className={styles.dialog} onClose={onClose} onClick={onDialogClick} aria-labelledby="note-dialog-title">
+      <SketchDialog
+        openKey={open ? open.slug : null}
+        onClose={onClose}
+        titleId="note-dialog-title"
+        label={open ? [open.category, open.date].filter(Boolean).join(' · ') : null}
+      >
         {open && (
-          <article className={`sketch ${styles.card}`}>
-            <div className="tape" aria-hidden="true" />
-            <header className={styles.cardHead}>
-              <p className="label label-sm">{[open.category, open.date].filter(Boolean).join(' · ')}</p>
-              <form method="dialog">
-                <button className="navlink" aria-label="Close note" style={{ background: 'none', border: 0, cursor: 'pointer', color: 'var(--ink)' }}>[Close ×]</button>
-              </form>
-            </header>
-            <div className={styles.scroll}>
-              <h3 id="note-dialog-title" className={styles.title}>{open.title}</h3>
-              {open.tldr && <p className={styles.tldr}><strong>TL;DR</strong> {open.tldr}</p>}
-              {bodies[open.slug]}
-            </div>
-          </article>
+          <>
+            <h3 id="note-dialog-title" className={styles.title}>{open.title}</h3>
+            {open.tldr && <p className={styles.tldr}><strong>TL;DR</strong> {open.tldr}</p>}
+            {bodies[open.slug]}
+          </>
         )}
-      </dialog>
+      </SketchDialog>
     </section>
   );
 }
