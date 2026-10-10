@@ -1,3 +1,4 @@
+import { revalidatePath } from 'next/cache';
 import { NextResponse, type NextRequest } from 'next/server';
 import { z } from 'zod';
 import { requireAdmin } from '@/lib/admin';
@@ -35,6 +36,8 @@ export async function PATCH(req: NextRequest) {
 
   const { error } = await supabaseAdmin().from('guestbook').update({ approved: parsed.data.approved }).eq('id', parsed.data.id);
   if (error) return NextResponse.json({ error: 'Could not update the entry' }, { status: 500 });
+  // The homepage is cached (ISR); rebuild it now so the wall reflects the change on the next visit.
+  revalidatePath('/');
   return NextResponse.json({ ok: true });
 }
 
@@ -48,5 +51,6 @@ export async function DELETE(req: NextRequest) {
 
   const { error } = await supabaseAdmin().from('guestbook').delete().eq('id', parsed.data.id);
   if (error) return NextResponse.json({ error: 'Could not delete the entry' }, { status: 500 });
+  revalidatePath('/');
   return NextResponse.json({ ok: true });
 }
