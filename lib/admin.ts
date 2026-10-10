@@ -31,7 +31,8 @@ export function verifyCredentials(username: string, password: string): boolean {
   if (!cfg) return false;
   const [, salt, expected] = cfg.hash.split(':'); // ':' not '$': Next's .env loader expands $NAME
   const actual = scryptSync(password, Buffer.from(salt, 'base64'), 64);
-  const userOk = same(Buffer.from(sign(cfg.key, username)), Buffer.from(sign(cfg.key, cfg.username)));
+  // Username isn't secret: ignore case and stray spaces. The password must match exactly.
+  const userOk = same(Buffer.from(sign(cfg.key, username.trim().toLowerCase())), Buffer.from(sign(cfg.key, cfg.username.toLowerCase())));
   const passOk = same(actual, Buffer.from(expected, 'base64'));
   return userOk && passOk;
 }
