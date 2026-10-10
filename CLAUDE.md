@@ -14,7 +14,7 @@ Next.js 15 (App Router, TypeScript) — Supabase + Vercel planned. `npm run dev`
 ## Sections (anchor ids in index.html)
 - `#about` — intro, photo frame, resume/LinkedIn/GitHub buttons
 - `#projects` — six project cards (JAppL, Ramble, LockedIn, Solar Car Telemetry, VCT 2025 Player Analytics, Anything but JUNK)
-- `#skills` — Languages & Frameworks / Tools & Technologies / Product Skills (sourced from public/resume.pdf) + "off the clock"
+- `#skills` — Languages & Frameworks / Tools & Technologies / Product Skills (sourced from public/resume.pdf)
 - `#notes` — blog list
 - `#contact` — "let's talk" box and footer
 

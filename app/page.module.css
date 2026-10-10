@@ -31,6 +31,7 @@
 .line { display: block; white-space: nowrap; }
 .text .lede { max-width: 680px; font-size: clamp(16px, 2.4vh, 19px); line-height: 1.55; }
 .text .principle { margin: 0; color: var(--accent); font-size: clamp(22px, 3.6vh, 30px); line-height: 1.15; }
+.offClock { font-weight: 700; font-size: 1.35em; line-height: 1; margin-right: 4px; }
 .text .open { font-size: clamp(20px, 3.4vh, 26px); }
 
 /* Very short windows (small laptop with toolbars, bookmarks bar): tighten so the intro still fits. */
